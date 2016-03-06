@@ -43,8 +43,6 @@ module test_top();
 	(
 		.CLK		(CLK		),
 		.RSTn		(RSTn		),
-		.ps2_clk_i	(ps2_clk_i	),
-		.ps2_data_i	(ps2_data_i	),
 		.led_o1     (led_o1   	),
 		.led_o2     (led_o2   	),
 		.led_o3     (led_o3   	),
@@ -53,8 +51,6 @@ module test_top();
 		.Red_Sig    (Red_Sig  	),
 		.Green_Sig  (Green_Sig	),
 		.Blue_Sig   (Blue_Sig 	),
-		.row_o      (row_o    	),
-		.column_o   (column_o 	),
 		.sdram_data	(sdram_data ),
 		.sdram_addr	(sdram_addr	),
 		.sdram_clk	(sdram_clk	),
