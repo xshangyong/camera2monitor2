@@ -101,6 +101,24 @@ module send_i2c
 						1:	sda_r<=0;
 						2:	sda_r<=cfg_data[31];
 						4:	sda_r<=cfg_data[30];
+						6:	sda_r<=cfg_data[29];
+						8:	sda_r<=cfg_data[28];
+						10:	sda_r<=cfg_data[27];
+						12:	sda_r<=cfg_data[26];
+						14:	sda_r<=cfg_data[25];
+						16:	sda_r<=cfg_data[24];
+						18:	sda_r<=cfg_data[23];
+						20:	sda_r<=cfg_data[22];
+						22:	sda_r<=cfg_data[21];
+						24:	sda_r<=cfg_data[20];
+						26:	sda_r<=cfg_data[19];
+						28:	sda_r<=cfg_data[18];
+						30:	sda_r<=cfg_data[17];
+						32:	sda_r<=cfg_data[16];
+						34:	sda_r<=cfg_data[15];
+						36:	sda_r<=cfg_data[14];
+						38:	sda_r<=cfg_data[13];
+						40:	sda_r<=cfg_data[12];
 					endcase
 				end	
 				ack : begin

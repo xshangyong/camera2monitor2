@@ -29,7 +29,7 @@ module camera_cfg
 		.rst_100    (rst_100),
 		.sclk       (sclk),
 		.sda        (sda),
-		.cfg_data   (cfg_data),
+		.cfg_data   (cfg_send),
 		.i2c_req    (i2c_req),
 		.i2c_ack    (i2c_ack)
 	);
