@@ -25,7 +25,8 @@ module test_top();
 	wire[1:0]   sdram_dqm	;
 	wire    	sdram_nras  ;
 	
-	
+	wire	sda;
+	wire	sclk;
 	initial begin
 		RSTn = 1;
 		#5000 RSTn = 0;
@@ -60,7 +61,9 @@ module test_top();
 		.sdram_nwe	(sdram_nwe	),
 		.sdram_ncs	(sdram_ncs	),
 		.sdram_dqm	(sdram_dqm	),
-		.sdram_nras (sdram_nras	)
+		.sdram_nras (sdram_nras	),
+		.sda		(sda),
+		.sclk		(sclk)
 	);
 	
 	sdram inst_sdram

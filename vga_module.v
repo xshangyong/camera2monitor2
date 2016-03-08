@@ -21,7 +21,11 @@ module vga_module
 	sdram_nwe,
 	sdram_ncs,
 	sdram_dqm,
-	sdram_nras
+	sdram_nras,
+	
+	sda,
+	sclk
+	
 );
 
 	input 	CLK;
@@ -51,7 +55,13 @@ module vga_module
 	output[1:0]		sdram_dqm;
 	output			sdram_nras;
 
-
+	// i2c camera config
+	output 	sclk;
+	inout 	sda;
+	// cmos camera
+	
+	
+	
 	/*************************************/
 	
 	wire 			VSYNC_Sig_d1;
@@ -147,6 +157,15 @@ module vga_module
 //	assign Red_Sig[4:0] = 5'b11111;
 //	assign Green_Sig[4:0] = 5'b11111;
 //	assign Blue_Sig[5:0] = 6'b11111;
+	
+	camera_cfg inst_camcfg(
+		.clk_100	(clk_100M),
+		.rst_100    (rst_100),
+		.sclk		(sclk),
+		.sda		(sda)
+	);
+	
+	
 	
 	clk_100m inst_100m(
 	    .inclk0( CLK ),    // input - from top
