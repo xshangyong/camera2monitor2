@@ -61,8 +61,11 @@ module send_i2c
 					end
 				end
 				send : begin
-					if(cnt_i2c == 128) begin
+					if(cnt_i2c == 73 && cnt_sclk >= 4999) begin
 						n_state = ack;
+					end
+					else begin
+						n_state = n_state;
 					end
 				end
 				ack : begin
@@ -90,8 +93,11 @@ module send_i2c
 					if(sclk_pulse == 1) begin
 						cnt_i2c <= cnt_i2c + 1;
 					end
-					if(cnt_i2c == 0) begin
+					if(cnt_i2c == 0 || cnt_i2c == 72 || cnt_i2c == 73) begin
 						sclk <= 1;
+					end
+					else if(cnt_i2c == 71) begin
+						sclk <= 0;
 					end
 					else begin
 						sclk <= cnt_i2c[0];
@@ -106,19 +112,37 @@ module send_i2c
 						10:	sda_r<=cfg_data[27];
 						12:	sda_r<=cfg_data[26];
 						14:	sda_r<=cfg_data[25];
-						16:	sda_r<=cfg_data[24];
-						18:	sda_r<=cfg_data[23];
-						20:	sda_r<=cfg_data[22];
-						22:	sda_r<=cfg_data[21];
-						24:	sda_r<=cfg_data[20];
-						26:	sda_r<=cfg_data[19];
-						28:	sda_r<=cfg_data[18];
-						30:	sda_r<=cfg_data[17];
-						32:	sda_r<=cfg_data[16];
-						34:	sda_r<=cfg_data[15];
-						36:	sda_r<=cfg_data[14];
-						38:	sda_r<=cfg_data[13];
-						40:	sda_r<=cfg_data[12];
+						16: sda_r<=1; // slave ack
+						18:	sda_r<=cfg_data[24];
+						20:	sda_r<=cfg_data[23];
+						22:	sda_r<=cfg_data[22];
+						24:	sda_r<=cfg_data[21];
+						26:	sda_r<=cfg_data[20];
+						28:	sda_r<=cfg_data[19];
+						30:	sda_r<=cfg_data[18];
+						32: sda_r<=cfg_data[17];
+						34:	sda_r<=1; // slave ack
+						36:	sda_r<=cfg_data[16];
+						38:	sda_r<=cfg_data[15];
+						40:	sda_r<=cfg_data[14];
+						42:	sda_r<=cfg_data[13];
+						44:	sda_r<=cfg_data[12];
+						46:	sda_r<=cfg_data[11];
+						48:	sda_r<=cfg_data[10];
+						50:	sda_r<=cfg_data[9];
+						52: sda_r<=1; // slave ack
+						54:	sda_r<=cfg_data[8];
+						56:	sda_r<=cfg_data[7];
+						58:	sda_r<=cfg_data[6];
+						60:	sda_r<=cfg_data[5];
+						62:	sda_r<=cfg_data[4];
+						64:	sda_r<=cfg_data[3];
+						66:	sda_r<=cfg_data[2];
+						68:	sda_r<=cfg_data[1];
+						70:	sda_r<=cfg_data[0];
+						71: sda_r<=0; 
+						72: sda_r<=0; 
+						73: sda_r<=1; 
 					endcase
 				end	
 				ack : begin
