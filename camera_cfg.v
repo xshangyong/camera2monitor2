@@ -3,14 +3,15 @@ module camera_cfg
 	clk_100,
 	rst_100,
 	sclk,
-	sda
+	sda,
+	cfg_done
 );
 
 	input 		clk_100;
 	input 		rst_100;
 	output 		sclk;
 	inout		sda;
-	
+	output reg	cfg_done = 0;
 	wire		i2c_ack;
 	reg			i2c_req = 0;
 	reg[23:0]	reg_data = 0;
@@ -58,6 +59,8 @@ module camera_cfg
 					end
 					else begin
 						n_state = n_state;
+						cfg_done <= 1;
+						
 					end
 				end
 				req : begin
@@ -230,8 +233,7 @@ module camera_cfg
 				 124:reg_data<=24'h583a26;
 				 125:reg_data<=24'h583b28;
 				 126:reg_data<=24'h583c42;
-				 127:reg_data<=24'h583dce;// lenc BR offset // AWB   自动白平衡
-				 128:reg_data<=24'h5180ff;// AWB B block
+				 127:reg_data<=24'h583dce;// lenc BR offset // AWB   自动白平�				 128:reg_data<=24'h5180ff;// AWB B block
 				 129:reg_data<=24'h5181f2;// AWB control 
 				 130:reg_data<=24'h518200;// [7:4] max local counter, [3:0] max fast counter
 				 131:reg_data<=24'h518314;// AWB advanced 
@@ -289,14 +291,13 @@ module camera_cfg
 				 183:reg_data<=24'h53886c;// CMX8 for V
 				 184:reg_data<=24'h538910;// CMX9 for V
 				 185:reg_data<=24'h538a01;// sign[9]
-				 186:reg_data<=24'h538b98; // sign[8:1] // UV adjust   UV色彩饱和度调整
-				 187:reg_data<=24'h558006;// saturation on, bit[1]
+				 186:reg_data<=24'h538b98; // sign[8:1] // UV adjust   UV色彩饱和度调�				 187:reg_data<=24'h558006;// saturation on, bit[1]
 				 188:reg_data<=24'h558340;
 				 189:reg_data<=24'h558410;
 				 190:reg_data<=24'h558910;
 				 191:reg_data<=24'h558a00;
 				 192:reg_data<=24'h558bf8;
-				 193:reg_data<=24'h501d40;// enable manual offset of contrast// CIP  锐化和降噪 
+				 193:reg_data<=24'h501d40;// enable manual offset of contrast// CIP  锐化和降�
 				 194:reg_data<=24'h530008;// CIP sharpen MT threshold 1
 				 195:reg_data<=24'h530130;// CIP sharpen MT threshold 2
 				 196:reg_data<=24'h530210;// CIP sharpen MT offset 1
@@ -311,7 +312,7 @@ module camera_cfg
 				 205:reg_data<=24'h530c06;// CIP sharpen TH offset 2
 				 206:reg_data<=24'h502500;
 				 207:reg_data<=24'h300802; // wake up from standby, bit[6]
-				 //640x480 30帧/秒, night mode 5fps, input clock =24Mhz, PCLK =56Mhz
+				 //640x480 30�� night mode 5fps, input clock =24Mhz, PCLK =56Mhz
 				 208:reg_data<=24'h303511;// PLL
 				 209:reg_data<=24'h303646;// PLL
 				 210:reg_data<=24'h3c0708;// light meter 1 threshold [7:0]
@@ -363,7 +364,7 @@ module camera_cfg
 				 250:reg_data<=24'h350300; // AEC/AGC on 
 				 
 				 //set OV5640 to video mode 720p 
-				 251:reg_data<=24'h303541;// PLL     input clock =24Mhz, PCLK =84Mhz
+				 251:reg_data<=24'h303521;// PLL     input clock =24Mhz, PCLK =84Mhz
 				 252:reg_data<=24'h303669;// PLL
 				 253:reg_data<=24'h3c0707; // lightmeter 1 threshold[7:0]
 				 254:reg_data<=24'h382041; // flip
@@ -417,6 +418,8 @@ module camera_cfg
 				 //strobe flash and frame exposure 	 
 				 302:reg_data<=24'h3b0083;              //STROBE CTRL: strobe request ON, Strobe mode: LED3 
 				 303:reg_data<=24'h3b0000;              //STROBE CTRL: strobe request OFF 
+				 	
+				
 				// 302:reg_data<=24'h503d80;            //reg_data<=24'h503d80; test pattern selection control, 80:color bar,00: test disable
 				// 303:reg_data<=24'h474101;            //reg_data<=24'h47401; test pattern enable, Test pattern 8-bit	 
 				 default:reg_data<=24'h000000;

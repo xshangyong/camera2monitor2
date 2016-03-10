@@ -12,17 +12,18 @@ set_location_assignment	PIN_P3	-to Red_Sig[1]
 set_location_assignment	PIN_N3	-to Red_Sig[2]
 set_location_assignment	PIN_K5	-to Red_Sig[3]
 set_location_assignment	PIN_L4	-to Red_Sig[4]
-set_location_assignment	PIN_L3	-to Green_Sig[0]
-set_location_assignment	PIN_T3	-to Green_Sig[1]
-set_location_assignment	PIN_R3	-to Green_Sig[2]
-set_location_assignment	PIN_T2	-to Green_Sig[3]
-set_location_assignment	PIN_R1	-to Green_Sig[4]
+set_location_assignment	PIN_L1	-to Green_Sig[0]
+set_location_assignment	PIN_L3	-to Green_Sig[1]
+set_location_assignment	PIN_T3	-to Green_Sig[2]
+set_location_assignment	PIN_R3	-to Green_Sig[3]
+set_location_assignment	PIN_T2	-to Green_Sig[4]
+set_location_assignment	PIN_R1	-to Green_Sig[5]
 set_location_assignment	PIN_P2	-to Blue_Sig[0]
 set_location_assignment	PIN_P1	-to Blue_Sig[1]
 set_location_assignment	PIN_N2	-to Blue_Sig[2]
 set_location_assignment	PIN_N1	-to Blue_Sig[3]
 set_location_assignment	PIN_L2	-to Blue_Sig[4]
-set_location_assignment	PIN_L1	-to Blue_Sig[5]
+
 
 
 set_location_assignment	PIN_A10	-to sdram_data[0]
@@ -41,7 +42,7 @@ set_location_assignment	PIN_F2	-to sdram_data[12]
 set_location_assignment	PIN_F1	-to sdram_data[13]
 set_location_assignment	PIN_G2	-to sdram_data[14]
 set_location_assignment	PIN_G1	-to sdram_data[15]
-										
+
 set_location_assignment	PIN_F15	-to sdram_addr[0]
 set_location_assignment	PIN_F16	-to sdram_addr[1]
 set_location_assignment	PIN_G15	-to sdram_addr[2]
@@ -66,3 +67,38 @@ set_location_assignment	PIN_B14	-to sdram_nwe
 set_location_assignment	PIN_C15	-to sdram_ncs
 set_location_assignment	PIN_B3	-to sdram_dqm[1]
 set_location_assignment	PIN_A14	-to sdram_dqm[0]
+
+
+set_location_assignment	PIN_N11	-to sclk 				
+set_location_assignment	PIN_P11	-to sda						
+
+#assigned by project
+set_location_assignment	PIN_M7	-to cmos_vsyn		
+set_location_assignment	PIN_N6	-to cmos_href		
+set_location_assignment	PIN_M16	-to cmos_pclk  		
+set_location_assignment	PIN_P9	-to cmos_xclk		
+set_location_assignment	PIN_N9	-to cmos_data[0]
+set_location_assignment	PIN_M9	-to cmos_data[1]
+set_location_assignment	PIN_M10	-to cmos_data[2]
+set_location_assignment	PIN_M8	-to cmos_data[3]
+set_location_assignment	PIN_P8	-to cmos_data[4]
+set_location_assignment	PIN_L7	-to cmos_data[5]
+set_location_assignment	PIN_M6	-to cmos_data[6]
+set_location_assignment	PIN_N8	-to cmos_data[7]
+
+# assigned by datasheet
+#set_location_assignment	PIN_M10	-to cmos_vsyn		
+#set_location_assignment	PIN_M9	-to cmos_href		
+#set_location_assignment	PIN_M16	-to cmos_pclk  		
+#set_location_assignment	PIN_P9	-to cmos_xclk		
+#set_location_assignment	PIN_M7	-to cmos_data[0]
+#set_location_assignment	PIN_N6	-to cmos_data[1]
+#set_location_assignment	PIN_N8	-to cmos_data[2]
+#set_location_assignment	PIN_M6	-to cmos_data[3]
+#set_location_assignment	PIN_L7	-to cmos_data[4]
+#set_location_assignment	PIN_P8	-to cmos_data[5]
+#set_location_assignment	PIN_N9	-to cmos_data[6]
+#set_location_assignment	PIN_M8	-to cmos_data[7]
+
+
+

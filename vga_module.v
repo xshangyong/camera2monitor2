@@ -24,8 +24,13 @@ module vga_module
 	sdram_nras,
 	
 	sda,
-	sclk
+	sclk,
 	
+	cmos_vsyn,
+	cmos_href,
+	cmos_pclk,
+	cmos_xclk,
+	cmos_data	
 );
 
 	input 	CLK;
@@ -40,8 +45,8 @@ module vga_module
 	output reg 	VSYNC_Sig;
 	output reg 	HSYNC_Sig;
 	output[4:0]	Red_Sig;
-	output[4:0]	Green_Sig;
-	output[5:0]	Blue_Sig;
+	output[5:0]	Green_Sig;
+	output[4:0]	Blue_Sig;
 
 	// sdram
 	inout[15:0] 	sdram_data;
@@ -58,10 +63,14 @@ module vga_module
 	// i2c camera config
 	output 	sclk;
 	inout 	sda;
-	// cmos camera
-	
-	
-	
+	// cmos camera	
+	input		cmos_vsyn;
+    input   	cmos_href;
+    input   	cmos_pclk;
+    output   	cmos_xclk;
+    input[7:0]  cmos_data;
+
+ 	
 	/*************************************/
 	
 	wire 			VSYNC_Sig_d1;
@@ -138,38 +147,94 @@ module vga_module
 	parameter	W_BSTOP		= 4'd11;	//precharge wait time  min=20ns
 	parameter	W_CHGACT	= 4'd12;	//precharge before act
 	parameter	W_TRPACT	= 4'd13;	//precharge before act
+	// 14 13 12 11 0010
+	// 10 9  8  7  1000
+	// 9 8 7 6		
+//	assign led_o1 = cnt_pclk[14];
+//	assign led_o2 = cnt_pclk[13];
+//	assign led_o3 = cnt_pclk[12];
+//	assign led_o4 = cnt_pclk[11];
 
-	assign led_o1 = led_r1;
-	assign led_o2 = led_r2;
-	assign led_o3 = led_r3;
-	assign led_o4 = 1;
+	assign led_o1 = cnt_ppp[16];
+	assign led_o2 =  cnt_ppp[15];
+	assign led_o3 =  cnt_ppp[14];
+	assign led_o4 =  cnt_ppp[13];
+
+
 
 	reg			start_wrfifoA = 0;
 	reg[19:0]	test_rdsdram = 0;
 	reg[31:0]	cnt_vsyn_neg = 0;
-	wire		clk_tmp80M;
-	
-	
+	wire			clk_tmp80M;
+	wire			clk_24M;
+	wire			cfg_done;
 	assign Red_Sig[4:1] = {Red_Sig[0],Red_Sig[0],Red_Sig[0]};
-	assign Green_Sig[4:1] = {Green_Sig[0],Green_Sig[0],Green_Sig[0]};
-	assign Blue_Sig[5:1] = {1'b0,Blue_Sig[0],Blue_Sig[0],Blue_Sig[0]};
-	
+	assign Green_Sig[5:1] = {Green_Sig[0],Green_Sig[0],Green_Sig[0],Green_Sig[0]};
+	assign Blue_Sig[4:1] = {Blue_Sig[0],Blue_Sig[0],Blue_Sig[0]};
+	assign cmos_xclk = clk_24M;	
 //	assign Red_Sig[4:0] = 5'b11111;
 //	assign Green_Sig[4:0] = 5'b11111;
 //	assign Blue_Sig[5:0] = 6'b11111;
+	reg		test_pin1 = 0;
+	reg		test_pin2 = 0;
+	reg		test_pin3 = 0;
+	reg		test_pin4 = 0;
+	reg[31:0]	cnt_100 = 0;
+	reg[31:0]	cnt_pclk = 0;
+	reg			flag_cnt = 0;
+	reg[31:0]	cnt_ppp = 0;
+//..//..//..//..//   test code  begin
+	always@(posedge clk_100M)begin
+		if(!rst_100) begin
+			cnt_100 <= 0;
+			flag_cnt <= 0;
+		end
+		else begin
+			if(cfg_done == 1) begin
+				if(cnt_100 == 20000 ) begin
+					flag_cnt <= 0;
+					cnt_100 <= cnt_100;
+				end
+				else begin
+					flag_cnt <= 1;
+					cnt_100 <= cnt_100 + 1;
+				end
+			end
+		end
+	end
 	
+	always@(posedge cmos_pclk)begin
+		if(flag_cnt == 1) begin
+			cnt_pclk <= cnt_pclk + 1;
+		end
+	end
+	
+	always@(posedge cmos_pclk)begin
+		if(cnt_ppp == 100000) begin
+			cnt_ppp <= cnt_ppp;
+		end
+		else begin
+			cnt_ppp <= cnt_ppp + 1; 
+		end
+	end
+	
+	
+//..//..//..//..//   test code end
+		
 	camera_cfg inst_camcfg(
 		.clk_100	(clk_100M),
 		.rst_100    (rst_100),
 		.sclk		(sclk),
-		.sda		(sda)
+		.sda		(sda),
+		.cfg_done	(cfg_done)
 	);
 	
 	
 	
 	clk_100m inst_100m(
 	    .inclk0( CLK ),    // input - from top
-		.c0( clk_tmp80M )  //  clk_100M = 25MHz
+		.c0( clk_tmp80M ),  //  clk_100M = 25MHz
+		.c1(clk_24M)		// 24M to cmos_camear
 	);
 
 	pll_133 inst_133m(
