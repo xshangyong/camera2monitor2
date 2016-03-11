@@ -101,10 +101,6 @@ module camera_cfg
 	end
 	
 	always @(*) begin
-		if(!rst_100) begin
-			reg_data = 0;
-		end
-		else begin
 			case(cnt_cfg)
 				 0:reg_data<=24'h310311;// system clock from pad, bit[1]
 				 1:reg_data<=24'h300882;// software reset, bit[7]// delay 5ms 
@@ -364,7 +360,7 @@ module camera_cfg
 				 250:reg_data<=24'h350300; // AEC/AGC on 
 				 
 				 //set OV5640 to video mode 720p 
-				 251:reg_data<=24'h303521;// PLL     input clock =24Mhz, PCLK =84Mhz
+				 251:reg_data<=24'h303541;// PLL     input clock =24Mhz, PCLK =84Mhz
 				 252:reg_data<=24'h303669;// PLL
 				 253:reg_data<=24'h3c0707; // lightmeter 1 threshold[7:0]
 				 254:reg_data<=24'h382041; // flip
@@ -424,6 +420,5 @@ module camera_cfg
 				// 303:reg_data<=24'h474101;            //reg_data<=24'h47401; test pattern enable, Test pattern 8-bit	 
 				 default:reg_data<=24'h000000;
 			endcase
-		end
 	end
 endmodule

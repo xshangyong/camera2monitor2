@@ -9,9 +9,9 @@ module test_top();
 	wire    led_o3     ;
 	wire    VSYNC_Sig  ;
 	wire    HSYNC_Sig  ;
-	wire    Red_Sig    ;
-	wire    Green_Sig  ;
-	wire    Blue_Sig   ;
+	wire[4:0]    Red_Sig    ;
+	wire[5:0]     Green_Sig  ;
+	wire[4:0]     Blue_Sig   ;
 	wire[7:0]    row_o      ;
 	wire[5:0]    column_o   ;
 	wire[15:0]  sdram_data  ;
@@ -25,8 +25,16 @@ module test_top();
 	wire[1:0]   sdram_dqm	;
 	wire    	sdram_nras  ;
 	
-	wire	sda;
-	wire	sclk;
+	wire		sda;
+	wire		sclk;
+	wire		cmos_vsyn;
+	wire		cmos_href;
+	wire		cmos_pclk;
+	wire		cmos_xclk;
+	wire[7:0]	cmos_data;
+	
+	
+	
 	initial begin
 		RSTn = 1;
 		#5000 RSTn = 0;
@@ -62,8 +70,13 @@ module test_top();
 		.sdram_ncs	(sdram_ncs	),
 		.sdram_dqm	(sdram_dqm	),
 		.sdram_nras (sdram_nras	),
-		.sda		(sda),
-		.sclk		(sclk)
+		.sda		(sda		),
+		.sclk		(sclk		),
+		.cmos_vsyn	(cmos_vsyn	),
+		.cmos_href	(cmos_href	),
+		.cmos_pclk	(cmos_pclk	),
+		.cmos_xclk	(cmos_xclk	),
+		.cmos_data	(cmos_data	)
 	);
 	
 	sdram inst_sdram

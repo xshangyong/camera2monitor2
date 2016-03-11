@@ -155,10 +155,6 @@ module vga_module
 //	assign led_o3 = cnt_pclk[12];
 //	assign led_o4 = cnt_pclk[11];
 
-	assign led_o1 = cnt_ppp[16];
-	assign led_o2 =  cnt_ppp[15];
-	assign led_o3 =  cnt_ppp[14];
-	assign led_o4 =  cnt_ppp[13];
 
 
 
@@ -184,6 +180,11 @@ module vga_module
 	reg			flag_cnt = 0;
 	reg[31:0]	cnt_ppp = 0;
 //..//..//..//..//   test code  begin
+	assign led_o1 = cnt_ppp[28];
+	assign led_o2 =  cnt_ppp[22];
+	assign led_o3 =  cnt_ppp[18];
+	assign led_o4 =  cnt_ppp[10];
+
 	always@(posedge clk_100M)begin
 		if(!rst_100) begin
 			cnt_100 <= 0;
@@ -210,12 +211,7 @@ module vga_module
 	end
 	
 	always@(posedge cmos_pclk)begin
-		if(cnt_ppp == 100000) begin
-			cnt_ppp <= cnt_ppp;
-		end
-		else begin
 			cnt_ppp <= cnt_ppp + 1; 
-		end
 	end
 	
 	
