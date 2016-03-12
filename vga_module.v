@@ -83,24 +83,11 @@ module vga_module
 	wire [2:0]		rom_dat;
 	wire  [2:0]     rom_dat_use;
 	wire[15:0]		rd_rom_add;
-	reg				wr_fifo_en = 0;
 	wire [2:0]		fifo_dat;
-	wire			ps2_done_r;
-	wire[1:0]		ps2_break_r;
-	wire[15:0]		ps2_data_r;
 	wire			is_pic;
 	wire[10:0]		fifo_used;
 	wire[10:0]		rd_fifo_used;
 	wire[4:0]		work_st;
-	reg[19:0] 		dat_2dig;
-	reg				led_r1 = 0;
-	reg				led_r2 = 0;
-	reg				led_r3 = 0;
-	reg				led_r4 = 0;
-	reg[7:0]		rom_radd_cnt = 0;
-	reg[7:0]		rom_cadd_cnt = 0;
-	reg[7:0]		rd_rom_radd = 0;
-	reg[7:0]		rd_rom_cadd = 0;
 	reg				wr_sdram_req=0;
 	wire			wr_sdram_ack;
 	reg[23:0]		wr_sdram_add=0;
@@ -124,7 +111,6 @@ module vga_module
 	reg[2:0]		st_rdsdram = 0;
 	reg[8:0]		wr_sdram_times = 0;
 	wire			fifo_clear;
-	wire			vsyn_neg;
 	wire[15:0]		data_vga;
 	wire[15:0]		cnt_work;
 	wire			vga_rdfifo;
@@ -158,79 +144,69 @@ module vga_module
 
 
 
-	reg			start_wrfifoA = 0;
 	reg[19:0]	test_rdsdram = 0;
 	reg[31:0]	cnt_vsyn_neg = 0;
 	wire			clk_tmp80M;
 	wire			clk_24M;
 	wire			cfg_done;
-	assign Red_Sig[4:1] = {Red_Sig[0],Red_Sig[0],Red_Sig[0]};
-	assign Green_Sig[5:1] = {Green_Sig[0],Green_Sig[0],Green_Sig[0],Green_Sig[0]};
-	assign Blue_Sig[4:1] = {Blue_Sig[0],Blue_Sig[0],Blue_Sig[0]};
+	wire			clk_cfg;
+	assign Red_Sig[4:1] = {Red_Sig[0],Red_Sig[0],Red_Sig[0],Red_Sig[0]};
+	assign Green_Sig[5:1] = {Green_Sig[0],Green_Sig[0],Green_Sig[0],Green_Sig[0],Green_Sig[0]};
+	assign Blue_Sig[4:1] = {Blue_Sig[0],Blue_Sig[0],Blue_Sig[0],Blue_Sig[0]};
 	assign cmos_xclk = clk_24M;	
 //	assign Red_Sig[4:0] = 5'b11111;
 //	assign Green_Sig[4:0] = 5'b11111;
 //	assign Blue_Sig[5:0] = 6'b11111;
-	reg		test_pin1 = 0;
-	reg		test_pin2 = 0;
-	reg		test_pin3 = 0;
-	reg		test_pin4 = 0;
 	reg[31:0]	cnt_100 = 0;
 	reg[31:0]	cnt_pclk = 0;
-	reg			flag_cnt = 0;
+	reg[31:0]	cnt_pclk_r = 0;
 	reg[31:0]	cnt_ppp = 0;
+	wire		test_sda;
+	wire		test_sclk;
+	
 //..//..//..//..//   test code  begin
-	assign led_o1 = cnt_ppp[28];
-	assign led_o2 =  cnt_ppp[22];
-	assign led_o3 =  cnt_ppp[18];
-	assign led_o4 =  cnt_ppp[10];
+	assign led_o1 =  cnt_pclk[28];
+	assign led_o2 =  cnt_pclk[24];
+	assign led_o3 =  cnt_pclk[18];
+	assign led_o4 = cmos_vsyn & cmos_href & cmos_data[0] & cmos_data[1] & cmos_data[2] & cmos_data[3] & cmos_data[4] & cmos_data[5] & cmos_data[6] & cmos_data[7];
 
-	always@(posedge clk_100M)begin
-		if(!rst_100) begin
-			cnt_100 <= 0;
-			flag_cnt <= 0;
-		end
-		else begin
-			if(cfg_done == 1) begin
-				if(cnt_100 == 20000 ) begin
-					flag_cnt <= 0;
-					cnt_100 <= cnt_100;
-				end
-				else begin
-					flag_cnt <= 1;
-					cnt_100 <= cnt_100 + 1;
-				end
-			end
-		end
-	end
-	
 	always@(posedge cmos_pclk)begin
-		if(flag_cnt == 1) begin
-			cnt_pclk <= cnt_pclk + 1;
-		end
+		cnt_pclk <= cnt_pclk + 1;
 	end
 	
-	always@(posedge cmos_pclk)begin
-			cnt_ppp <= cnt_ppp + 1; 
+	always@(posedge clk_100M) begin
+		cnt_ppp <= cnt_ppp + 1; 
 	end
-	
 	
 //..//..//..//..//   test code end
 		
-	camera_cfg inst_camcfg(
+ 	camera_cfg inst_camcfg(
 		.clk_100	(clk_100M),
 		.rst_100    (rst_100),
 		.sclk		(sclk),
 		.sda		(sda),
 		.cfg_done	(cfg_done)
-	);
+	); 
 	
+	reg_config	reg_config_inst(
+		.clk_25M                 (clk_cfg),
+		.camera_rstn             (rst_100),
+		.initial_en              (),		
+		.i2c_sclk                (),
+		.i2c_sdat                (),
+		.reg_conf_done           (),
+		.strobe_flash            (),
+		.reg_index               (),
+		.clock_20k               (),
+		.key1                    (1'b1)
+	);
 	
 	
 	clk_100m inst_100m(
 	    .inclk0( CLK ),    // input - from top
-		.c0( clk_tmp80M ),  //  clk_100M = 25MHz
-		.c1(clk_24M)		// 24M to cmos_camear
+		.c0( clk_tmp80M ),  //  100MHz
+		.c1(clk_24M),		// 24M to cmos_camera
+		.c2(clk_cfg)		// 25M to cfg camera
 	);
 
 	pll_133 inst_133m(
@@ -456,8 +432,7 @@ module vga_module
 	);
 	
 	
-	wire[19:0]	to_dig;
-	assign to_dig[19:0] = test_rdsdram[2:0]+test_rdsdram[5:3]*10+test_rdsdram[8:6]*100+test_rdsdram[11:9]*1000+test_rdsdram[14:12]*10000+test_rdsdram[17:15]*100000;
+//	assign to_dig[19:0] = test_rdsdram[2:0]+test_rdsdram[5:3]*10+test_rdsdram[8:6]*100+test_rdsdram[11:9]*1000+test_rdsdram[14:12]*10000+test_rdsdram[17:15]*100000;
 	   
 	   
 	   
@@ -465,44 +440,7 @@ module vga_module
 	 
 
 	
-	 
-	 always@(posedge CLK)begin
-		if(ps2_done_r == 1) begin
-			 dat_2dig <= ps2_data_r[15:8] * 1000 + ps2_data_r[7:0];
-	   end
-	 end
-	 
-	 
-	always@(posedge clk_100M)begin
-		if(!rst_100) begin
-			led_r1 <= 1;
-			led_r2 <= 1;
-			led_r3 <= 1;
-			led_r4 <= 1;
-			cnt_vsyn_neg <= 0;
-		end
-		else begin
-			if(VSYNC_Sig_d1 == 0 && VSYNC_Sig == 1) begin
-				cnt_vsyn_neg <= cnt_vsyn_neg + 1;	
-			end
-			
-			if(cnt_vsyn_neg[4] == 1) begin
-				led_r1 <= ~led_r1;
-			end
-			
-			if(wr_sdram_add == 24'h400) begin
-				led_r2 = 0;
-			end
-			
-			if(wr_sdram_add == 24'h5000) begin
-				led_r3 = 0;
-			end
-			
-			if(wr_sdram_add == 24'h10000) begin
-				led_r4 = 0;
-			end
-		end
-	end
+
 	 
 	/*
 	 always@(posedge CLK)begin
@@ -571,7 +509,7 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig & wr_sdram_finish;
 		  .Red_Sig( Red_Sig[0] ),      // output - to top
 		  .Green_Sig( Green_Sig[0] ),  // output - to top
 		  .Blue_Sig( Blue_Sig[0] ),    // output - to top
-		  .ps2_data_i( ps2_data_r[7:0] ),
+		  .ps2_data_i( ),
 		  .rom_addr_o(rom_addr),
 		  .display_data(data_vga[2:0]),
 		  .is_pic(is_pic)
