@@ -1,21 +1,21 @@
 module send_i2c
 (
-	clk_100,
+	clk_20k,
 	rst_100,
-	sclk,
-	sda,
 	cfg_data,
 	i2c_req,
-	i2c_ack
+	i2c_ack,
+	sclk,
+	sda
 );
 
-	input 		clk_100;
+	input 		clk_20k;
 	input 		rst_100;
 	inout		sda;
 	input[31:0]	cfg_data;
 	input		i2c_req;
 	output reg	i2c_ack = 0;
-	output reg	sclk = 1;
+	output 		sclk;
 	
 	
 	wire[7:0]	cnt_i2c;
@@ -26,159 +26,86 @@ module send_i2c
 	reg			sclk_pulse 	= 0;
 	reg			sda_r 		= 1;
 
-	parameter	rst 	= 0;
-	parameter	idle 	= 1;
-	parameter	req 	= 2;
-	parameter	send 	= 3;
-	parameter	ack 	= 4;
-	
-	assign sda = sda_r ? 1'bz : 0;
+    reg [5:0] cyc_count;
+    reg reg_sdat;
+    reg reg_clk;
+    reg ack1,ack2,ack3;
+ 
+   
+    wire i2c_sclk;
+    wire i2c_sdat;
+    wire ack;
+   
+    assign sclk=reg_clk|(((cyc_count>=4)&(cyc_count<=39))?~clk_20k:0);
+    assign sda=reg_sdat?1'bz:0;
 
-	
-	always @(posedge clk_100) begin
-		if(!rst_100) begin
-			c_state <= rst;
+	always@(posedge clk_20k or  negedge rst_100)
+    begin
+       if(!rst_100)
+         cyc_count<=6'b111111;
+       else 
+		   begin
+           if(i2c_req==0)
+             cyc_count<=0;
+           else if(cyc_count<6'b111111)
+             cyc_count<=cyc_count+1;
+         end
+    end
+
+    always@(posedge clk_20k or negedge rst_100)
+    begin
+		if(!rst_100)
+		begin
+			i2c_ack<=0;
+			reg_clk<=1;
+			reg_sdat<=1;
 		end
-		else begin
-			c_state <= n_state;
-		end
-	end
-	
-	always @(*) begin
-		if(!rst_100) begin
-			n_state <= rst;
-		end
-		else begin
-			case(c_state)
-				rst : begin
-					n_state = idle;
-				end
-				idle : begin
-					if(i2c_req == 1) begin  
-						n_state = send;
-					end
-					else begin
-						n_state = n_state;
-					end
-				end
-				send : begin
-					if(cnt_i2c_r == 89 && cnt_sclk >= 4999) begin
-						n_state = ack;
-					end
-					else begin
-						n_state = n_state;
-					end
-				end
-				ack : begin
-					n_state = idle;
-				end
-			endcase
-		end
+       else
+          case(cyc_count)
+          0:begin i2c_ack<=0;reg_clk<=1;reg_sdat<=1;end
+          1:reg_sdat<=0;                 //开始传输
+          2:reg_clk<=0;
+          3:reg_sdat<=cfg_data[31];
+          4:reg_sdat<=cfg_data[30];
+          5:reg_sdat<=cfg_data[29];
+          6:reg_sdat<=cfg_data[28];
+          7:reg_sdat<=cfg_data[27];
+          8:reg_sdat<=cfg_data[26];
+          9:reg_sdat<=cfg_data[25];
+          10:reg_sdat<=cfg_data[24];
+          11:reg_sdat<=1;                //应答信号
+          12:begin reg_sdat<=cfg_data[23];end
+          13:reg_sdat<=cfg_data[22];
+          14:reg_sdat<=cfg_data[21];
+          15:reg_sdat<=cfg_data[20];
+          16:reg_sdat<=cfg_data[19];
+          17:reg_sdat<=cfg_data[18];
+          18:reg_sdat<=cfg_data[17];
+          19:reg_sdat<=cfg_data[16];
+          20:reg_sdat<=1;                //应答信号       
+          21:begin reg_sdat<=cfg_data[15];end
+          22:reg_sdat<=cfg_data[14];
+          23:reg_sdat<=cfg_data[13];
+          24:reg_sdat<=cfg_data[12];
+          25:reg_sdat<=cfg_data[11];
+          26:reg_sdat<=cfg_data[10];
+          27:reg_sdat<=cfg_data[9];
+          28:reg_sdat<=cfg_data[8];
+          29:reg_sdat<=1;                //应答信号       
+          30:begin reg_sdat<=cfg_data[7];end
+          31:reg_sdat<=cfg_data[6];
+          32:reg_sdat<=cfg_data[5];
+          33:reg_sdat<=cfg_data[4];
+          34:reg_sdat<=cfg_data[3];
+          35:reg_sdat<=cfg_data[2];
+          36:reg_sdat<=cfg_data[1];
+          37:reg_sdat<=cfg_data[0];
+          38:reg_sdat<=1;                //应答信号       
+          39:begin reg_clk<=0;reg_sdat<=0;end
+          40:reg_clk<=1;
+          41:begin reg_sdat<=1;i2c_ack<=1;end
+          endcase
 	end	
-	assign cnt_i2c = cnt_i2c_r >= 3 ? cnt_i2c_r - 3 : 0;
-	always @(posedge clk_100) begin
-		if(!rst_100) begin
-			i2c_ack <= 0;
-			cnt_i2c_r <= 0;
-		end
-		else begin
-			case(c_state)
-				rst : begin
-					i2c_ack <= 0;
-				end
-				idle : begin
-					i2c_ack <= 0;
-				end
-				send : begin
-					i2c_ack <= 0;
-					if(sclk_pulse == 1) begin
-						cnt_i2c_r <= cnt_i2c_r + 1;
-					end
-					if(cnt_i2c >=0 && cnt_i2c <=3) begin
-						sclk <= 1;
-					end
-					else if(cnt_i2c == 4 || cnt_i2c == 5 || cnt_i2c == 6) begin
-						sclk <= 0;
-					end
-					else if(cnt_i2c == 78 || cnt_i2c == 79) begin
-						sclk <= 0;
-					end
-					else if(cnt_i2c >= 80 && cnt_i2c <= 82) begin
-						sclk <= 1;
-					end
-					else if(cnt_i2c <= 80)begin
-						sclk <= cnt_i2c[0];
-					end
-					case(cnt_i2c)
-						0  :	sda_r<=1;
-						2  :	sda_r<=0;
-						4  :	sda_r<=0;
-						6  :	sda_r<=cfg_data[31];
-						8  :	sda_r<=cfg_data[30];
-						10 :	sda_r<=cfg_data[29];
-						12 :	sda_r<=cfg_data[28];
-						14 :	sda_r<=cfg_data[27];
-						16 :	sda_r<=cfg_data[26];
-						18 :	sda_r<=cfg_data[25];
-						20 : 	sda_r<=cfg_data[24];
-						22 :	sda_r<=1; // slave ack
-						24 :	sda_r<=cfg_data[23];
-						26 :	sda_r<=cfg_data[22];
-						28 :	sda_r<=cfg_data[21];
-						30 :	sda_r<=cfg_data[20];
-						32 :	sda_r<=cfg_data[19];
-						34 :	sda_r<=cfg_data[18];
-						36 : 	sda_r<=cfg_data[17];
-						38 :	sda_r<=cfg_data[16];
-						40 :	sda_r<=1; // slave ack
-						42 :	sda_r<=cfg_data[15];
-						44 :	sda_r<=cfg_data[14];
-						46 :	sda_r<=cfg_data[13];
-						48 :	sda_r<=cfg_data[12];
-						50 :	sda_r<=cfg_data[11];
-						52 :	sda_r<=cfg_data[10];
-						54 :	sda_r<=cfg_data[9];
-						56 : 	sda_r<=cfg_data[8];
-						58 :	sda_r<=1; // slave ack
-						60 :	sda_r<=cfg_data[7];
-						62 :	sda_r<=cfg_data[6];
-						64 :	sda_r<=cfg_data[5];
-						66 :	sda_r<=cfg_data[4];
-						68 :	sda_r<=cfg_data[3];
-						70 :	sda_r<=cfg_data[2];
-						72 :	sda_r<=cfg_data[1];
-						74 :	sda_r<=cfg_data[0];
-						76 : 	sda_r<=1; // slave ack
-						78 : 	sda_r<=0; 
-						80 : 	sda_r<=0; 
-						82 : 	sda_r<=1; 
-					endcase
-				end	
-				ack : begin
-					i2c_ack <= 1;
-					cnt_i2c_r <= 0;
-				end	
-			endcase
-		end
-	end
 	
-	always @(posedge clk_100) begin
-		if(!rst_100) begin
-			cnt_sclk <= 0;
-			sclk_pulse <= 0;
-		end
-		else begin
-			if(i2c_req == 1) begin
-				cnt_sclk <= 0;
-			end
-			else if(cnt_sclk == 4999) begin
-				cnt_sclk <= 0;
-				sclk_pulse <= 1;
-			end
-			else begin
-				cnt_sclk <= cnt_sclk + 1;
-				sclk_pulse <= 0;
-			end
-		end
-	end
+	
 endmodule

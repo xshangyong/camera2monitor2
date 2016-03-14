@@ -181,11 +181,10 @@ module vga_module
 //..//..//..//..//   test code end
 		
  	camera_cfg inst_camcfg(
-		.clk_100	(clk_100M),
+		.clk_25M	(clk_cfg),
 		.rst_100    (rst_100),
 		.sclk		(sclk),
-		.sda		(sda),
-		.cfg_done	(cfg_done)
+		.sda		(sda)
 	); 
 	
 	reg_config	reg_config_inst(

@@ -37,10 +37,6 @@ module test_top();
 	
 	initial begin
 		RSTn = 1;
-		#5000 RSTn = 0;
-		#5000 RSTn = 1;
-//		#600000 RSTn = 0;
-		#5000 RSTn = 1;
 	end
 		
 		
@@ -54,7 +50,6 @@ module test_top();
 		.RSTn		(RSTn		),
 		.led_o1     (led_o1   	),
 		.led_o2     (led_o2   	),
-		.led_o3     (led_o3   	),
 		.VSYNC_Sig  (VSYNC_Sig	),
 		.HSYNC_Sig  (HSYNC_Sig	),
 		.Red_Sig    (Red_Sig  	),
@@ -74,6 +69,7 @@ module test_top();
 		.sclk		(sclk		),
 		.cmos_vsyn	(cmos_vsyn	),
 		.cmos_href	(cmos_href	),
+		.led_o3     (led_o3   	),
 		.cmos_pclk	(cmos_pclk	),
 		.cmos_xclk	(cmos_xclk	),
 		.cmos_data	(cmos_data	)

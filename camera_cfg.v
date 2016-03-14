@@ -1,107 +1,105 @@
 module camera_cfg
 (
-	clk_100,
+	clk_25M,
 	rst_100,
 	sclk,
-	sda,
-	cfg_done
+	sda
 );
+	
+	input clk_25M;
+	input rst_100;
+	output sclk;
+	output sda;
 
-	input 		clk_100;
-	input 		rst_100;
-	output 		sclk;
-	inout		sda;
-	output reg	cfg_done = 0;
-	wire		i2c_ack;
-	reg			i2c_req = 0;
-	reg[23:0]	reg_data = 0;
-	reg[31:0]	cfg_send = 0;
-	reg[15:0]	cnt_cfg = 0;
-	reg[4:0]	n_state = 0;	
-	reg[4:0]	c_state = 0;	
-	
-	parameter	rst 	= 0;
-	parameter	idle 	= 1;
-	parameter	req 	= 2;
-	parameter	ack 	= 3;
-	
-	send_i2c	inst_sendi2c(
-		.clk_100	(clk_100),
-		.rst_100    (rst_100),
-		.sclk       (sclk),
-		.sda        (sda),
-		.cfg_data   (cfg_send),
-		.i2c_req    (i2c_req),
-		.i2c_ack    (i2c_ack)
+	reg [15:0]clock_20k_cnt;
+	reg [1:0]config_step;
+
+	reg [31:0]i2c_data;
+	reg [23:0]reg_data;
+	reg i2c_req;
+	reg reg_conf_done_reg;
+	reg [8:0]reg_index;
+	reg	rst1;
+	reg	rst2;	
+	reg clock_20k;
+	wire	i2c_ack;
+	send_i2c inst_sendi2c(
+		.clk_20k(clock_20k),
+		.rst_100(rst2),
+		.cfg_data(i2c_data),
+		.i2c_req(i2c_req),
+		.i2c_ack(i2c_ack),
+		.sclk(sclk),
+		.sda(sda)
 	);
-	
-	always @(posedge clk_100) begin
+
+	always@(posedge clk_25M or negedge rst_100)begin
 		if(!rst_100) begin
-			c_state <= rst;
+			rst1 <= 0;
+			rst2 <= 0;
 		end
 		else begin
-			c_state <= n_state;
+			rst1 <= 1;
+			rst2 <= rst1;
+		end
+	end 
+
+
+
+	//产生i2c控制时钟-20khz    
+	always@(posedge clk_25M or negedge rst2)   
+	begin
+	   if(!rst2) begin
+			clock_20k<=0;
+			clock_20k_cnt<=0;
+	   end
+	   else if(clock_20k_cnt<1249)
+		  clock_20k_cnt<=clock_20k_cnt+1'b1;
+	   else begin
+			 clock_20k<=!clock_20k;
+			 clock_20k_cnt<=0;
+	   end
+	end			   
+				   
+	always@(posedge clock_20k or negedge rst2) begin
+		if(!rst2) begin
+			config_step<=0;
+			i2c_req<=0;
+			reg_index<=0;
+			reg_conf_done_reg<=0;
+		end
+		else begin
+			if(reg_conf_done_reg==1'b0) begin          //如果camera初始化未完成
+				 // if(reg_index<251) begin
+				  if(reg_index<302) begin
+						 case(config_step)
+						 0:begin
+							i2c_data<={8'h78,reg_data};       //IIC Device address is 0x78   
+							i2c_req<=1;
+							config_step<=1;
+						 end
+						 1:begin
+							if(i2c_ack) begin                       //IIC发送结束               					
+								 i2c_req<=0;
+								 config_step<=2;
+							end
+						 end
+						 2:begin
+							  reg_index<=reg_index+1'b1;
+							  config_step<=0;
+						 end
+						 endcase
+					end
+				 else 
+					reg_conf_done_reg<=1'b1;
+			end
 		end
 	end
-	
+ 
+ 
+ 
 	always @(*) begin
-		if(!rst_100) begin
-			n_state <= rst;
-		end
-		else begin
-			case(c_state)
-				rst : begin
-					n_state = idle;
-				end
-				idle : begin
-					if(cnt_cfg < 304) begin  
-						n_state = req;
-					end
-					else begin
-						n_state = n_state;
-						cfg_done <= 1;
-						
-					end
-				end
-				req : begin
-					n_state = ack;
-				end
-				ack : begin
-					if(i2c_ack == 1) begin
-						n_state = idle;
-					end
-				end
-			endcase
-		end
-	end	
-	
-	always @(posedge clk_100) begin
-		if(!rst_100) begin
-			i2c_req <= 0;
-			cnt_cfg <= 0;
-		end
-		else begin
-			case(c_state)
-				rst : begin
-					i2c_req <= 0;
-				end
-				idle : begin
-					i2c_req <= 0;
-				end
-				req : begin
-					i2c_req <= 1;
-					cnt_cfg <= cnt_cfg + 1;
-					cfg_send <= {8'h78,reg_data[23:0]};
-				end
-				ack : begin
-					i2c_req <= 0;
-				end	
-			endcase
-		end
-	end
-	
-	always @(*) begin
-			case(cnt_cfg)
+			case(reg_index)
 				 0:reg_data<=24'h310311;// system clock from pad, bit[1]
 				 1:reg_data<=24'h300882;// software reset, bit[7]// delay 5ms 
 				 2:reg_data<=24'h300842;// software power down, bit[6]
@@ -152,7 +150,7 @@ module camera_cfg
 				 47:reg_data<=24'h381110;// Timing Hoffset[7:0]
 				 48:reg_data<=24'h381200;// Timing Voffset[10:8] 
 				 49:reg_data<=24'h370864;
-				 50:reg_data<=24'h400102;// BLC start from line 2
+				 50:reg_data<=24'h400102;// BLC i2c_req from line 2
 				 51:reg_data<=24'h40051a;// BLC always update
 				 52:reg_data<=24'h300000;// enable blocks
 				 53:reg_data<=24'h3004ff;// enable clocks 
@@ -229,7 +227,8 @@ module camera_cfg
 				 124:reg_data<=24'h583a26;
 				 125:reg_data<=24'h583b28;
 				 126:reg_data<=24'h583c42;
-				 127:reg_data<=24'h583dce;// lenc BR offset // AWB   自动白平�				 128:reg_data<=24'h5180ff;// AWB B block
+				 127:reg_data<=24'h583dce;// lenc BR offset // AWB   自动白平�				 
+				 128:reg_data<=24'h5180ff;// AWB B block
 				 129:reg_data<=24'h5181f2;// AWB control 
 				 130:reg_data<=24'h518200;// [7:4] max local counter, [3:0] max fast counter
 				 131:reg_data<=24'h518314;// AWB advanced 
@@ -287,7 +286,8 @@ module camera_cfg
 				 183:reg_data<=24'h53886c;// CMX8 for V
 				 184:reg_data<=24'h538910;// CMX9 for V
 				 185:reg_data<=24'h538a01;// sign[9]
-				 186:reg_data<=24'h538b98; // sign[8:1] // UV adjust   UV色彩饱和度调�				 187:reg_data<=24'h558006;// saturation on, bit[1]
+				 186:reg_data<=24'h538b98; // sign[8:1] // UV adjust   UV色彩饱和度调�				 
+				 187:reg_data<=24'h558006;// saturation on, bit[1]
 				 188:reg_data<=24'h558340;
 				 189:reg_data<=24'h558410;
 				 190:reg_data<=24'h558910;
@@ -316,10 +316,10 @@ module camera_cfg
 				 212:reg_data<=24'h382107;// Sensor mirror on, ISP mirror on, H binning on
 				 213:reg_data<=24'h381431;// X INC 
 				 214:reg_data<=24'h381531;// Y INC
-				 215:reg_data<=24'h380000;// HS: X address start high byte
-				 216:reg_data<=24'h380100;// HS: X address start low byte
-				 217:reg_data<=24'h380200;// VS: Y address start high byte
-				 218:reg_data<=24'h380304;// VS: Y address start high byte 
+				 215:reg_data<=24'h380000;// HS: X address i2c_req high byte
+				 216:reg_data<=24'h380100;// HS: X address i2c_req low byte
+				 217:reg_data<=24'h380200;// VS: Y address i2c_req high byte
+				 218:reg_data<=24'h380304;// VS: Y address i2c_req high byte 
 				 219:reg_data<=24'h38040a;// HW (HE)         
 				 220:reg_data<=24'h38053f;// HW (HE)
 				 221:reg_data<=24'h380607;// VH (VE)         
@@ -414,7 +414,7 @@ module camera_cfg
 				 //strobe flash and frame exposure 	 
 				 302:reg_data<=24'h3b0083;              //STROBE CTRL: strobe request ON, Strobe mode: LED3 
 				 303:reg_data<=24'h3b0000;              //STROBE CTRL: strobe request OFF 
-				 	
+				 304:reg_data<=24'h303521;				// set PCLK 84MHz
 				
 				// 302:reg_data<=24'h503d80;            //reg_data<=24'h503d80; test pattern selection control, 80:color bar,00: test disable
 				// 303:reg_data<=24'h474101;            //reg_data<=24'h47401; test pattern enable, Test pattern 8-bit	 
