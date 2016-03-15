@@ -3,14 +3,15 @@ module camera_cfg
 	clk_25M,
 	rst_100,
 	sclk,
-	sda
+	sda,
+	cfg_done
 );
 	
 	input clk_25M;
 	input rst_100;
 	output sclk;
 	output sda;
-
+	output cfg_done;
 	reg [15:0]clock_20k_cnt;
 	reg [1:0]config_step;
 
@@ -23,6 +24,8 @@ module camera_cfg
 	reg	rst2;	
 	reg clock_20k;
 	wire	i2c_ack;
+	
+	assign cfg_done = reg_conf_done_reg;
 	send_i2c inst_sendi2c(
 		.clk_20k(clock_20k),
 		.rst_100(rst2),

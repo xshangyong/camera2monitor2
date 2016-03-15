@@ -148,7 +148,6 @@ module vga_module
 	reg[31:0]	cnt_vsyn_neg = 0;
 	wire			clk_tmp80M;
 	wire			clk_24M;
-	wire			cfg_done;
 	wire			clk_cfg;
 	assign Red_Sig[4:1] = {Red_Sig[0],Red_Sig[0],Red_Sig[0],Red_Sig[0]};
 	assign Green_Sig[5:1] = {Green_Sig[0],Green_Sig[0],Green_Sig[0],Green_Sig[0],Green_Sig[0]};
@@ -160,22 +159,67 @@ module vga_module
 	reg[31:0]	cnt_100 = 0;
 	reg[31:0]	cnt_pclk = 0;
 	reg[31:0]	cnt_pclk_r = 0;
-	reg[31:0]	cnt_ppp = 0;
+	reg[31:0]	cnt_ref = 0;
+	reg[31:0]	cnt_pix = 0;
+	reg[31:0]	cnt_vsyn = 0;
+	reg			pclk_valid = 0;
 	wire		test_sda;
 	wire		test_sclk;
+	wire		cfg_done;
+	reg			cmos_href_d1,cmos_href_d2;
+	reg			cmos_vsyn_d1,cmos_vsyn_d2;
+	wire		href_neg,href_pos;
+	//..//..//..//..//   test code  begin
+	assign led_o1 =  cnt_pix >  2048 ? 1 : 0;
+	assign led_o2 =  cnt_pix ==  2048 ? 1 : 0;
+	assign led_o3 =  cnt_pix ==  2047 ? 1 : 0;
+	assign led_o4 =  cnt_pix ==  2046 ? 1 : 0;
 	
-//..//..//..//..//   test code  begin
-	assign led_o1 =  cnt_pclk[28];
-	assign led_o2 =  cnt_pclk[24];
-	assign led_o3 =  cnt_pclk[18];
-	assign led_o4 = cmos_vsyn & cmos_href & cmos_data[0] & cmos_data[1] & cmos_data[2] & cmos_data[3] & cmos_data[4] & cmos_data[5] & cmos_data[6] & cmos_data[7];
-
 	always@(posedge cmos_pclk)begin
-		cnt_pclk <= cnt_pclk + 1;
+		cmos_href_d1 <= cmos_href;
+		cmos_href_d2 <= cmos_href_d1;
+		cmos_vsyn_d1 <= cmos_vsyn;
+		cmos_vsyn_d2 <= cmos_vsyn_d1;	
+	end
+	assign href_pos = ~cmos_href_d2 & cmos_href_d1;
+	assign href_neg = cmos_href_d2 & ~cmos_href_d1;	
+	assign vsyn_pos = ~cmos_vsyn_d2 & cmos_vsyn_d1;
+	
+	
+	always@(posedge cmos_pclk)begin
+		if(href_neg) begin
+			cnt_pix <= 0;
+		end
+		else if(cmos_href) begin
+			cnt_pix <= cnt_pix + 1;
+		end
+		
+		
+		if(vsyn_pos) begin
+			cnt_ref <= 0;
+		end
+		else if(href_neg) begin
+			cnt_ref <= cnt_ref + 1;
+		end
+		
+		
 	end
 	
 	always@(posedge clk_100M) begin
-		cnt_ppp <= cnt_ppp + 1; 
+		if(!cfg_done) begin
+			cnt_100 <= 0;
+			pclk_valid <= 0;
+		end
+		else begin
+			if(cnt_100 < 10000) begin
+				cnt_100 <= cnt_100 + 1;	
+				pclk_valid <= 1;
+			end			
+			else begin
+				cnt_100 <= cnt_100;
+				pclk_valid <= 0;
+			end
+		end
 	end
 	
 //..//..//..//..//   test code end
@@ -184,7 +228,8 @@ module vga_module
 		.clk_25M	(clk_cfg),
 		.rst_100    (rst_100),
 		.sclk		(sclk),
-		.sda		(sda)
+		.sda		(sda),
+		.cfg_done	(cfg_done)
 	); 
 	
 	reg_config	reg_config_inst(
