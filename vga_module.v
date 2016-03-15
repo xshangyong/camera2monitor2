@@ -169,7 +169,9 @@ module vga_module
 	reg			cmos_href_d1,cmos_href_d2;
 	reg			cmos_vsyn_d1,cmos_vsyn_d2;
 	wire		href_neg,href_pos;
-	//..//..//..//..//   test code  begin
+	wire[15:0]	data_16b;
+	wire		data_16b_en;
+	/*	//..//..//..//..//   test code  begin
 	assign led_o1 =  cnt_pix >  2048 ? 1 : 0;
 	assign led_o2 =  cnt_pix ==  2048 ? 1 : 0;
 	assign led_o3 =  cnt_pix ==  2047 ? 1 : 0;
@@ -223,8 +225,31 @@ module vga_module
 	end
 	
 //..//..//..//..//   test code end
-		
- 	camera_cfg inst_camcfg(
+*/
+ 	recv_cam inst_recv(
+		.cmos_data	(cmos_data),
+		.cmos_pclk	(cmos_pclk),
+		.cmos_href	(cmos_href),
+		.cfg_done	(cfg_done),
+		.data_16b	(data_16b),
+		.data_16b_en(data_16b_en)
+	);
+	
+	cam2fifo inst_cam2fifo(
+		.cmos_pclk		(cmos_pclk),
+		.clk_133M_i		(clk_133M),
+		.rst_100i		(rst_100),
+		.rst_133i		(rst_133),
+		.data_16b		(data_16b),
+		.data_16b_en	(data_16b_en),
+		.fifo_used_o	(fifo_used),
+		.wr_sdram_data	(wr_sdram_data),
+		.work_st		(work_st)
+	);
+
+	
+	
+	camera_cfg inst_camcfg(
 		.clk_25M	(clk_cfg),
 		.rst_100    (rst_100),
 		.sclk		(sclk),
@@ -437,28 +462,7 @@ module vga_module
 				end
 			endcase
 		end
-	   end
-
-	read_rom	inst_rdrom
-	(
-		.clk_100M_i		(clk_100M),
-		.rst_n_i		(rst_100),
-		.rd_rom_add_i	(rd_rom_add),
-		.rom_dat_use_o	(rom_dat_use)	
-	);
-	
-	rom2fifo	inst_rom2fifo
-	(
-		.clk_100M_i		(clk_100M),
-		.clk_133M_i		(clk_133M),
-		.rst_100i		(rst_100),
-		.rst_133i		(rst_133),
-		.rom_dat_i		(rom_dat_use),
-		.rdrom_add_o	(rd_rom_add),
-		.fifo_used_o	(fifo_used),
-		.wr_sdram_data	(wr_sdram_data),
-		.work_st		(work_st)
-	);
+   end
 
 	fifo2vga	inst_fifo2vga
 	(

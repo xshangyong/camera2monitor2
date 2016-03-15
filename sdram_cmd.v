@@ -148,7 +148,7 @@ module sdram_cmd
 				sdram_addr_r 	<= 13'hfff;
 				sdram_ba_r		<= 2'b11;				
 			end
-			// row addr:wr_sdram_add[21:9], column addr:wr_sdram_add[8:0]
+			// row addr:wr_sdram_add[21:9] 8192	, column addr:wr_sdram_add[8:0] 512
 			I_done: begin
 				case(work_st)
 					W_IDLE : begin

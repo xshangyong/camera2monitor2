@@ -1,14 +1,14 @@
-module rom2fifo
+module cam2fifo
 (
-	clk_100M_i,
-	clk_133M_i,
-	rst_100i,
-	rst_133i,
-	rom_dat_i,
-	rdrom_add_o,
-	fifo_used_o,
-	wr_sdram_data,
-	work_st
+	cmos_pclk		,  	
+	clk_133M_i		,  
+	rst_100i		,  
+	rst_133i		,  
+	data_16b		,  
+	data_16b_en	    ,
+	fifo_used_o	    ,
+	wr_sdram_data   ,
+	work_st		    
 );
 	// 100MHz for write fifo
 	// 133MHz for read  fifo 
@@ -18,7 +18,7 @@ module rom2fifo
 	input			rst_133i;
 	input[2:0]		rom_dat_i;
 	input[4:0]		work_st;
-	output[15:0]	rdrom_add_o;
+	input			rdrom_add_o;
 	output[10:0]	fifo_used_o;
 	output[15:0]	wr_sdram_data;
 	wire[10:0]		fifo_used;
@@ -71,98 +71,8 @@ module rom2fifo
 
 //  	wr_fifo state machine 
 //	 	fifo_use < 512 ,start write , 1 write state machine write 255 data
-	always@(posedge clk_100M_i) begin   
-		if(!rst_100i) begin
-			wr_fifo_st <= Clear;
-		end
-		
-		else begin
-			case (wr_fifo_st)
-				Clear : begin
-					wr_fifo_st  <= Idle;
-				end
-				
-				Idle : begin
-					if(rd_rom_add == 16'hffff) begin
-						wr_fifo_st 	<= Idle;
-					end
-					else if(fifo_used <= 512) begin
-						wr_fifo_st  <= Wr_fifo;
-					end
-					else begin
-						wr_fifo_st 	<= Idle;
-					end
-				end
-				
-				Wr_fifo : begin
-					if(rom_cadd_cnt == 255) begin
-						wr_fifo_st <= Idle;
-					end
-					
-					else begin
-						wr_fifo_st <= Wr_fifo;
-					end
-				end
-			
-			endcase
-		end
-		
-	end
+
 	
-//  write data to fifo	
-	always@(posedge clk_100M_i) begin  
-		if(!rst_100i) begin
-			rom_cadd_cnt 	<= 0;
-			rom_radd_cnt 	<= 0;
-			wr_fifo_en   <= 0;
-			rd_rom_add   <= 0;
-		end
-		
-		else begin
-			case (wr_fifo_st)
-				Clear: begin
-					rom_cadd_cnt 	<= 0;
-					rom_radd_cnt 	<= 0;
-					wr_fifo_en <= 0;
-				end
-				
-				Idle : begin
-					rom_cadd_cnt <= 0;
-					wr_fifo_en <= 0;
-				end
-				
-				Wr_fifo : begin
-					if(rom_cadd_cnt == 255) begin
-						if(rom_radd_cnt == 255) begin  
-							rom_radd_cnt 	<= 0;
-						end
-						
-						else begin
-							rom_radd_cnt 	<= rom_radd_cnt + 1;
-						end
-						rom_cadd_cnt <= 0;
-						wr_fifo_en 	<= 1;
-						rd_rom_add <= {rom_radd_cnt,rom_cadd_cnt};
-					end
-					
-					else begin
-						rom_cadd_cnt <= rom_cadd_cnt + 1;
-						wr_fifo_en 	<= 1;
-						rd_rom_add <= {rom_radd_cnt,rom_cadd_cnt};
-					end	
-				end
-			endcase
-		end
-		
-	end
-	always@(posedge clk_100M_i) begin  
-		if(!rst_100i) begin
-			wr_fifo_1d <= 0;
-		end
-		else begin
-			wr_fifo_1d <= wr_fifo_en;
-		end
-		
-	end
+
 
 endmodule
