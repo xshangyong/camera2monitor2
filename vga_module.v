@@ -79,7 +79,6 @@ module vga_module
 	wire [10:0]		Column_Addr_Sig;
 	wire [10:0]		Row_Addr_Sig;
 	wire 			Ready_Sig;
-	wire [15:0]		rom_addr;
 	wire [2:0]		rom_dat;
 	wire  [2:0]     rom_dat_use;
 	wire[15:0]		rd_rom_add;
@@ -103,9 +102,6 @@ module vga_module
 	wire			rd_sdram_ack;
 	reg[23:0]		rd_sdram_add=0;
 	wire[15:0]		rd_sdram_data;
-	reg				wr_sdram_finish;
-	reg				wr_sdram_finisha;
-	reg				wr_sdram_finishb;
 
 	reg[2:0]		st_wrsdram = 0;
 	reg[2:0]		st_rdsdram = 0;
@@ -149,9 +145,6 @@ module vga_module
 	wire			clk_tmp80M;
 	wire			clk_24M;
 	wire			clk_cfg;
-	assign Red_Sig[4:1] = {Red_Sig[0],Red_Sig[0],Red_Sig[0],Red_Sig[0]};
-	assign Green_Sig[5:1] = {Green_Sig[0],Green_Sig[0],Green_Sig[0],Green_Sig[0],Green_Sig[0]};
-	assign Blue_Sig[4:1] = {Blue_Sig[0],Blue_Sig[0],Blue_Sig[0],Blue_Sig[0]};
 	assign cmos_xclk = clk_24M;	
 //	assign Red_Sig[4:0] = 5'b11111;
 //	assign Green_Sig[4:0] = 5'b11111;
@@ -171,6 +164,7 @@ module vga_module
 	wire		href_neg,href_pos;
 	wire[15:0]	data_16b;
 	wire		data_16b_en;
+	reg			bank_switch = 0;
 	/*	//..//..//..//..//   test code  begin
 	assign led_o1 =  cnt_pix >  2048 ? 1 : 0;
 	assign led_o2 =  cnt_pix ==  2048 ? 1 : 0;
@@ -226,6 +220,15 @@ module vga_module
 	
 //..//..//..//..//   test code end
 */
+
+	always@(posedge cmos_pclk)begin
+		cmos_vsyn_d1 <= cmos_vsyn;
+		cmos_vsyn_d2 <= cmos_vsyn_d1;	
+	end
+	assign vsyn_pos = ~cmos_vsyn_d2 & cmos_vsyn_d1;
+
+	
+	
  	recv_cam inst_recv(
 		.cmos_data	(cmos_data),
 		.cmos_pclk	(cmos_pclk),
@@ -238,8 +241,8 @@ module vga_module
 	cam2fifo inst_cam2fifo(
 		.cmos_pclk		(cmos_pclk),
 		.clk_133M_i		(clk_133M),
-		.rst_100i		(rst_100),
 		.rst_133i		(rst_133),
+		.vsyn_pos		(vsyn_pos),
 		.data_16b		(data_16b),
 		.data_16b_en	(data_16b_en),
 		.fifo_used_o	(fifo_used),
@@ -319,64 +322,7 @@ module vga_module
 		.cnt_work		(cnt_work)
 	);
 
-	// read sdram, rd_sdram_req high means read begins,ack high means read finished 
-	// start when wr_sdram_finish == 1 && vsync negadge
-	reg		wr_en;
-//	wire 	rd_en;
-	/*
-	always@(posedge clk_133M or negedge rst_133)begin
-		if(!rst_133) begin
-			rd_en <= 0;
-		end
-		else if(work_st == W_RDDAT && rd_sdram_add[21:9]==0)begin
-			rd_en <= 1;
-		end
-		else if(work_st == W_RDDAT && rd_sdram_add[21:9]<=200)begin
-			rd_en <= 0;
-		end
-		else begin
-			rd_en <= rd_en;
-		end
-	end
-	*/
-	//  && (rd_sdram_add[21:9]<=400)
-//	assign rd_en = ((work_st == W_RDDAT) && (rd_sdram_add[21:9]==0) ) ? 1 : 0;
-	always@(posedge clk_133M or negedge rst_133)begin
-		if(!rst_133) begin
-			wr_en <= 0;
-		end
-		else if(work_st == W_WRITE && wr_sdram_add[21:9]==0)begin
-			wr_en <= 1;
-		end
-		else if(work_st == W_WRITE && wr_sdram_add[21:9]<=200)begin
-			wr_en <= 0;
-		end
-		else begin
-			wr_en <= wr_en;
-		end
-	end
-	
-	always@(posedge clk_133M or negedge rst_133)begin
-		if(!rst_133) begin
-			test_rdsdram <= 0;
-		end
-		else if(work_st == W_RDDAT && cnt_work == 0 && rd_sdram_add[21:9]==0) begin
-			test_rdsdram[8:6] <= sdram_data[2:0];	
-		end
-		else if(work_st == W_RDDAT && cnt_work == 1 && rd_sdram_add[21:9]==0) begin
-			test_rdsdram[5:3] <= sdram_data[2:0];	
-		end
-		else if(work_st == W_RDDAT && cnt_work == 2 && rd_sdram_add[21:9]==0) begin
-			test_rdsdram[2:0] <= sdram_data[2:0];	
-		end
-		else if(work_st == W_WRITE && wr_en==1)begin
-			case(cnt_work)
-				3 : test_rdsdram[11:9] <= sdram_data[2:0];
-				2 :	test_rdsdram[14:12] <= sdram_data[2:0];
-				1 :	test_rdsdram[17:15] <= sdram_data[2:0];	
-			endcase
-		end
-	end
+
 
 	always@(posedge clk_133M or negedge rst_133)begin
 		if(!rst_133) begin
@@ -393,16 +339,15 @@ module vga_module
 			else begin
 				case(st_rdsdram)
 					0 : begin
-						if( wr_sdram_finishb == 1 &&
-							rd_fifo_used <= 512 &&
-							rd_sdram_add[21:9] < 128) begin
+						if( rd_fifo_used <= 512 ) begin
 							st_rdsdram <= 1;
 							rd_sdram_req <= 1;
+							rd_sdram_add[22] <= ~bank_switch;
 						end
 					end	
 					1 : begin
 						if(rd_sdram_ack == 1) begin
-							rd_sdram_add[21:9] <= rd_sdram_add[21:9] + 1'b1;
+							rd_sdram_add[21:9] <= rd_sdram_add[21:9] + 1'b1;						
 							rd_sdram_req <= 0;
 							st_rdsdram <= 0;
 						end
@@ -411,56 +356,49 @@ module vga_module
 			end
 		end
 	   end
-	
-	
-	always@(posedge clk_133M or negedge rst_133)begin
-		if(!rst_133) begin
-			wr_sdram_finishb <= 0;
-		end
-		else if (wr_sdram_add[21:9] >= 127)begin //(wr_sdram_add[21:9] == 127  && VSYNC_Sig == 0 )begin
-			wr_sdram_finishb <= 1;
-		end
-	end
-	
-	always@(posedge clk_100M or negedge rst_100)begin
-		if(!rst_100) begin
-			wr_sdram_finisha <= 0;
-			wr_sdram_finish <= 0;
-		end
-		else begin
-			wr_sdram_finisha <= wr_sdram_finishb;
-			wr_sdram_finish  <= wr_sdram_finisha;
+		
+	// write sdram, wr_sdram_req high means write begins,ack high means write finished 
+	// start when fifo_used >= 512
+	always@(posedge cmos_pclk)begin
+		if(vsyn_pos == 1) begin
+			bank_switch <= ~bank_switch;
 		end
 	end
 
-	// write sdram, wr_sdram_req high means write begins,ack high means write finished 
-	// start when fifo_used >= 512
+	
+
+	
 	always@(posedge clk_133M or negedge rst_133)begin
 		if(!rst_133) begin
 			wr_sdram_req   <= 0;
 			wr_sdram_add   <= 0;
-			wr_sdram_times <= 0;
 			st_wrsdram     <= 0;
 		end
 		else begin
-			case(st_wrsdram)
-				0 : begin
-					if(wr_sdram_times < 128 &&
-						fifo_used >= 512) begin
-						st_wrsdram <= 1;
-						wr_sdram_req <= 1;
+			if(VSYNC_Sig_d1 == 0) begin
+				st_wrsdram <= 0;
+				wr_sdram_add <= 0;
+				wr_sdram_req <= 0;
+			end
+			else begin
+				case(st_wrsdram)
+					0 : begin
+						if(fifo_used >= 512) begin
+							st_wrsdram <= 1;
+							wr_sdram_req <= 1;
+							wr_sdram_add[22] <= bank_switch;
+						end
+					end	
+					1 : begin
+						if(wr_sdram_ack == 1) begin
+							// row addr:wr_sdram_add[21:9], column addr:wr_sdram_add[8:0]
+							wr_sdram_add[21:9] <= wr_sdram_add[21:9] + 1'b1;							
+							wr_sdram_req <= 0;
+							st_wrsdram <= 0;
+						end
 					end
-				end	
-				1 : begin
-					if(wr_sdram_ack == 1) begin
-						// row addr:wr_sdram_add[21:9], column addr:wr_sdram_add[8:0]
-						wr_sdram_add[21:9] <= wr_sdram_add[21:9] + 1'b1;
-						wr_sdram_req <= 0;
-						st_wrsdram <= 0;
-						wr_sdram_times <= wr_sdram_times + 8'b1;
-					end
-				end
-			endcase
+				endcase
+			end
 		end
    end
 
@@ -512,25 +450,15 @@ module vga_module
 	 end
 assign  fifo_clear  = VSYNC_Sig_d1 & ~VSYNC_Sig;  //negadge
 assign  vsyn_neg    = VSYNC_Sig_d1 & ~VSYNC_Sig;  //negadge
-assign  vga_rdfifo 	= is_pic & Ready_Sig & wr_sdram_finish;
+assign  vga_rdfifo 	= is_pic & Ready_Sig;
 	 
 	 
 	 
 	reg rst_vgasyn,rst_vgasyn1,rst_vgasyn2;
 	
-	always @(*) begin
-		if(!rst_133) begin
-			rst_vgasyn = 0;
-		end
-		else begin
-			if(wr_sdram_add[21:9] >= 127) begin
-				rst_vgasyn = 1;
-			end
-		end
-	end
 
 	always @ ( posedge clk_100M) begin
-		rst_vgasyn1 <= rst_vgasyn;
+		rst_vgasyn1 <= ~vsyn_pos;
 		rst_vgasyn2 <= rst_vgasyn1;
 	end
 	
@@ -550,16 +478,15 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig & wr_sdram_finish;
 	 vga_control_module inst_vga_control
 	 (
 	      .CLK( clk_100M ),
-		  .RSTn( rst_vgasyn2 ), //rst_100
-		  .Ready_Sig( Ready_Sig ),             // input - from inst_sync
+		  .RSTn( cfg_done ), //rst_100
+		  .Ready_Sig( rst_vgasyn2 ),             // input - from inst_sync
 		  .Column_Addr_Sig( Column_Addr_Sig ), // input - from inst_sync
 		  .Row_Addr_Sig( Row_Addr_Sig ),       // input - from inst_sync
-		  .Red_Sig( Red_Sig[0] ),      // output - to top
-		  .Green_Sig( Green_Sig[0] ),  // output - to top
-		  .Blue_Sig( Blue_Sig[0] ),    // output - to top
+		  .Red_Sig( Red_Sig[4:0] ),      // output - to top
+		  .Green_Sig( Green_Sig[5:0] ),  // output - to top
+		  .Blue_Sig( Blue_Sig[4:0] ),    // output - to top
 		  .ps2_data_i( ),
-		  .rom_addr_o(rom_addr),
-		  .display_data(data_vga[2:0]),
+		  .display_data(data_vga[15:0]),
 		  .is_pic(is_pic)
 	 );
 

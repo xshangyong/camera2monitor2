@@ -42,7 +42,6 @@ module fifo2vga
 	wire[10:0]	fifo_used;
 	assign fifo_used_o = fifo_used;
 	assign wr_fifo = (work_st == W_RDDAT) ? 1 : 0;
-	assign data_vga[15:3] = 0;
 	
 	
 	
@@ -58,12 +57,12 @@ module fifo2vga
 	desk_fifo inst_dfifo2
 	(	         
 		.aclr	(fifo_clear),
-		.data	(sdram_data[2:0]),
+		.data	(sdram_data[15:0]),
 		.rdclk	(clk_100M),
 		.rdreq	(vga_rdfifo),
 		.wrclk	(clk_133M_i),
 		.wrreq	(wr_fifo),
-		.q		(data_vga[2:0]),
+		.q		(data_vga[15:0]),
 		.rdempty(),
 		.rdusedw(),
 		.wrfull	(),

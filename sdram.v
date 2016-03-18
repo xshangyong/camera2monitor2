@@ -607,7 +607,7 @@ module sdram(Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
             $display ("Read_enable == 1");
 			if ((Ba == 2'b00 && Pc_b0 == 1'b1) || (Ba == 2'b01 && Pc_b1 == 1'b1) ||
                 (Ba == 2'b10 && Pc_b2 == 1'b1) || (Ba == 2'b11 && Pc_b3 == 1'b1)) begin
-                $display("%m : at time %t ERROR: Bank is not Activated for Read", $time);
+                $display("%m : at time %t ERROR: Bank %d is not Activated for Read", $time,Ba);
             end
 
             // Activate to Read or Write
@@ -932,7 +932,7 @@ module sdram(Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
                     2'b11 : Bank3 [{Row, Col}] = Dq;
 				endcase
 				if(Col<=10 && Row==0) begin
-					$display("Row=%d,Col=%d,Dq=%d",Row,Col,Dq);
+					$display("Row=%d,Col=%d,Dq=%h bank=%d",Row,Col,Dq,Bank);
 				end
                 
 

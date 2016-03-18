@@ -1,7 +1,7 @@
 `timescale 1 ns / 1 ps
 module test_top();
 
-	reg 	CLK = 0;
+	reg 	CLK;
 	reg		RSTn,ps2_clk_i,ps2_data_i;
 
 	wire    led_o1     ;	
@@ -27,22 +27,61 @@ module test_top();
 	
 	wire		sda;
 	wire		sclk;
-	wire		cmos_vsyn;
-	wire		cmos_href;
-	wire		cmos_pclk;
+	reg			cmos_vsyn;
+	reg			cmos_href;
+	reg			cmos_pclk;
 	wire		cmos_xclk;
-	wire[7:0]	cmos_data;
+	reg[7:0]	cmos_data;
 	
-	
+	reg[31:0] cnt = 0;
+	reg[31:0] cnt_row = 0;
 	
 	initial begin
 		RSTn = 1;
+		CLK = 0;
+		cmos_pclk = 0;
+		cmos_href = 0;
+		cmos_vsyn = 0;
+		cmos_data = 0;
 	end
 		
 		
 	always begin
 		#10 CLK = ~CLK;
 	end
+	
+	always begin
+		#5.95 cmos_pclk = ~cmos_pclk;
+	end
+	
+	always @(posedge cmos_pclk) begin
+		if(cnt == 5596992) begin
+			cnt <= 0;
+		end
+		else begin
+			cnt <= cnt + 1;
+		end
+		
+		if( cnt >= 0 && cnt <= 100) begin
+			cmos_vsyn <= 1;
+		end
+		else begin
+			cmos_vsyn <= 0;
+		end
+		
+		if(cnt > 100) begin
+			if(cnt == 110) begin
+				cmos_href <= 1;
+			end
+			cmos_data <= cmos_data + 1;
+			if(cnt == 7279) begin
+				cmos_href <= 0;
+				cmos_data <= 0;
+			end
+		end
+	end
+	
+
 	
 	vga_module dut
 	(

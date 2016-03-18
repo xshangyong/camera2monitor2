@@ -188,7 +188,7 @@ module sdram_cmd
 						if(cnt_work == 0)begin
 							cmd_r <= CMD_RD;
 							sdram_addr_r 	<= 0;
-							sdram_ba_r		<= wr_sdram_add[23:22];
+							sdram_ba_r		<= rd_sdram_add[23:22];
 						end 
 						else begin
 							cmd_r <= CMD_NOP;
@@ -200,7 +200,7 @@ module sdram_cmd
 						if(cnt_work == 509)begin
 							cmd_r <= CMD_BSTOP;
 							sdram_addr_r 	<= 0;
-							sdram_ba_r		<= wr_sdram_add[23:22];
+							sdram_ba_r		<= rd_sdram_add[23:22];
 						end
 						else begin
 							cmd_r <= CMD_NOP;

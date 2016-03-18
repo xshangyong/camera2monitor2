@@ -1,32 +1,21 @@
 module cam2fifo
 (
-	cmos_pclk		,  	
-	clk_133M_i		,  
-	rst_100i		,  
-	rst_133i		,  
-	data_16b		,  
-	data_16b_en	    ,
-	fifo_used_o	    ,
-	wr_sdram_data   ,
-	work_st		    
+	input 			cmos_pclk		,  	
+	input			clk_133M_i		,  
+	input			rst_133i		,  
+	input			vsyn_pos		,  
+	input[15:0]		data_16b		,  
+	input			data_16b_en	    ,
+	output[10:0]	fifo_used_o	    ,
+	output[15:0]	wr_sdram_data   ,
+	input[4:0]		work_st		    
 );
 	// 100MHz for write fifo
 	// 133MHz for read  fifo 
-	input 			clk_100M_i;
-	input 			clk_133M_i;
-	input			rst_100i;
-	input			rst_133i;
-	input[2:0]		rom_dat_i;
-	input[4:0]		work_st;
-	input			rdrom_add_o;
-	output[10:0]	fifo_used_o;
-	output[15:0]	wr_sdram_data;
+
+	
 	wire[10:0]		fifo_used;
-	wire				clear_fifo;
 	reg				wr_fifo_en = 0;
-	reg[7:0]		rom_radd_cnt = 0;
-	reg[7:0]		rom_cadd_cnt = 0;
-	reg[15:0]		rd_rom_add = 0;
 	reg[3:0]		wr_fifo_st = 0;
 	reg				wr_fifo_1d = 0;
 	wire			rd_fifo;
@@ -47,32 +36,22 @@ module cam2fifo
 	parameter	W_PRECH		= 4'd9;		//precharge
 	parameter	W_TRP		= 4'd10;	//precharge wait time  min=20ns
 	
-	assign rdrom_add_o = rd_rom_add;
 	assign fifo_used_o = fifo_used;
 	assign rd_fifo = (work_st == W_WRITE) ? 1 : 0;
-	assign wr_sdram_data[15:3] = 0;
-	assign clear_fifo = ~rst_100i;
 	
 	
 	desk_fifo inst_dfifo
 	(	         
-		.aclr	(clear_fifo),  // need clear
-		.data	(rom_dat_i),
+		.aclr	(vsyn_pos),  // need clear
+		.data	(data_16b[15:0]),
 		.rdclk	(clk_133M_i),
 		.rdreq	(rd_fifo),
-		.wrclk	(clk_100M_i),
-		.wrreq	(wr_fifo_1d),
-		.q		(wr_sdram_data[2:0]),
+		.wrclk	(cmos_pclk),
+		.wrreq	(data_16b_en),
+		.q		(wr_sdram_data[15:0]),
 		.rdempty(),
 		.rdusedw(),
 		.wrfull	(),
 		.wrusedw(fifo_used)
 	);
-
-//  	wr_fifo state machine 
-//	 	fifo_use < 512 ,start write , 1 write state machine write 255 data
-
-	
-
-
 endmodule

@@ -6,7 +6,7 @@ module vga_control_module
 	 Ready_Sig, Column_Addr_Sig, Row_Addr_Sig,
 	 Red_Sig, Green_Sig, Blue_Sig,
 	 ps2_data_i,
-	 rom_addr_o,display_data,
+	 display_data,
 	 is_pic
 );
 
@@ -17,17 +17,15 @@ module vga_control_module
 	 input [10:0]	Column_Addr_Sig;
 	 input [10:0]	Row_Addr_Sig;
 	 input [7:0] 	ps2_data_i;
-	 input [2:0]	display_data;
-	 output [15:0]	rom_addr_o;
-	 output Red_Sig;
-	 output Green_Sig;
-	 output Blue_Sig;
+	 input [15:0]	display_data;
+	 output[4:0] Red_Sig;
+	 output[5:0] Green_Sig;
+	 output[4:0] Blue_Sig;
 	 output is_pic;
 	 
 	 
 	 reg[15:0] posx = 400;
 	 reg[15:0] posy = 400;
-	 wire[15:0]  rom_addr_r;
 	 reg[5:0]  rom_col_addr_r = 0;
 	 parameter length = 50;
 	 /**********************************/
@@ -100,13 +98,8 @@ parameter V_TOTAL    	= 926 ;
 // 			pika display
 
 		
-	assign is_pic = Row_Addr_Sig <= 256 ?
-					Row_Addr_Sig >= 1 ?
-					Column_Addr_Sig <= 256 ?
-					Column_Addr_Sig <= 256 ? 1 : 0 : 0 : 0 : 0;
+	assign is_pic = (Row_Addr_Sig <= 768 && Column_Addr_Sig <= 1024) ? 1 : 0;
 					
-	assign rom_addr_r = Row_Addr_Sig < 256 ?
-					Column_Addr_Sig < 256 ? Row_Addr_Sig*256 + Column_Addr_Sig : 0 : 0; 				
 
 	 
 	 always @ ( posedge CLK or negedge RSTn )
@@ -116,10 +109,9 @@ parameter V_TOTAL    	= 926 ;
 			rom_col_addr_r <= Column_Addr_Sig[5:0] ;
 
 	/************************************/
-     assign rom_addr_o = rom_addr_r[15:0];			
-	 assign Red_Sig   = Ready_Sig && display_data[2] && is_pic ? 1'b1 : 1'b0;
-	 assign Green_Sig = Ready_Sig && display_data[1] && is_pic ? 1'b1 : 1'b0;
-	 assign Blue_Sig  = Ready_Sig && display_data[0] && is_pic ? 1'b1 : 1'b0;
+	 assign Red_Sig[4:0]   = Ready_Sig && is_pic ? display_data[15:11] : 0;
+	 assign Green_Sig[5:0] = Ready_Sig && is_pic ? display_data[10:5]  : 0;
+	 assign Blue_Sig[4:0]  = Ready_Sig && is_pic ? display_data[4:0]   : 0;
 	 
 	/***********************************/
 	 
