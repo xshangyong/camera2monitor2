@@ -378,10 +378,10 @@ module camera_cfg
 				 263:reg_data<=24'h38053f; // HW (HE)
 				 264:reg_data<=24'h380606; // VH (VE)
 				 265:reg_data<=24'h3807a9; // VH (VE)
-				 266:reg_data<=24'h380804; // DVPHO     (1280)->1024
-				 267:reg_data<=24'h380900; // DVPHO     (1280)->1024
-				 268:reg_data<=24'h380a02; // DVPVO     (720)->
-				 269:reg_data<=24'h380bd0; // DVPVO     (720)->
+				 266:reg_data<=24'h380803; // DVPHO     (1280)->1024   	800
+				 267:reg_data<=24'h380920; // DVPHO     (1280)->1024
+				 268:reg_data<=24'h380a01; // DVPVO     (720)->			600
+				 269:reg_data<=24'h380be0; // DVPVO     (720)->
 				 270:reg_data<=24'h380c07; // HTS
 				 271:reg_data<=24'h380d64; // HTS
 				 272:reg_data<=24'h380e02; // VTS

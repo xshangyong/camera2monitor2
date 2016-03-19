@@ -44,7 +44,7 @@ module sdram(Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
     parameter addr_bits =       13;
     parameter data_bits =       16;
     parameter col_bits  =       9;
-    parameter mem_sizes = 	  	4194303;//8388607;  //ÿ��bankѰַ�ռ�Ĵ�С
+    parameter mem_sizes = 	  	4194303;//8388607;  //每个bank寻址空间的大小
 						
     inout     [data_bits - 1 : 0] Dq;
     input     [addr_bits - 1 : 0] Addr;

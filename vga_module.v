@@ -157,9 +157,10 @@ module vga_module
 //	assign Blue_Sig[5:0] = 6'b11111;
 	reg[31:0]	cnt_100 = 0;
 	reg[31:0]	cnt_pclk = 0;
-	reg[31:0]	cnt_pclk_r = 0;
+	reg[31:0]	cnt_ref_r = 0;
 	reg[31:0]	cnt_ref = 0;
 	reg[31:0]	cnt_pix = 0;
+	reg[31:0]	cnt_pix_r = 0;
 	reg[31:0]	cnt_vsyn = 0;
 	reg			pclk_valid = 0;
 	wire		test_sda;
@@ -173,10 +174,10 @@ module vga_module
 	reg			bank_switch = 0;
 	
 	
-	assign led_o1 =  wr_sdram_add[21:9] ==  0 ? 1 : 0; 
-	assign led_o2 =  wr_sdram_add[21:9] >=  50  ? 1 : 0; 
-	assign led_o3 =  wr_sdram_add[21:9] >=  100 ? 1 : 0; 
-	assign led_o4 =  wr_sdram_add[21:9] >=  250 ? 1 : 0; 
+	assign led_o1 =  st_wrsdram; 
+	assign led_o2 =  st_rdsdram; 
+	assign led_o3 =  wr_sdram_req; 
+	assign led_o4 =  wr_sdram_ack; 
 	/*	//..//..//..//..//   test code  begin
 	assign led_o1 =  cnt_pix >  2048 ? 1 : 0;
 	assign led_o2 =  cnt_pix ==  2048 ? 1 : 0;
@@ -234,11 +235,37 @@ module vga_module
 */
 
 	always@(posedge cmos_pclk)begin
+		cmos_href_d1 <= cmos_href;
+		cmos_href_d2 <= cmos_href_d1;
 		cmos_vsyn_d1 <= cmos_vsyn;
-		cmos_vsyn_d2 <= cmos_vsyn_d1;	
-	end
-	assign vsyn_pos = ~cmos_vsyn_d2 & cmos_vsyn_d1;
+		cmos_vsyn_d2 <= cmos_vsyn_d1;
+		if(vsyn_pos == 1) begin
+			cnt_ref <= 0;
+			cnt_ref_r <= cnt_ref;
+		end
+		else begin
+			if(href_pos == 1) begin
+				cnt_ref <= cnt_ref + 1;
+			end
+		end
+		
+		if(href_neg == 1) begin
+			cnt_pix <= 0;
+			cnt_pix_r <= cnt_pix;
 
+		end
+		else if(cmos_href == 1) begin
+			cnt_pix <= cnt_pix + 1;
+		end
+		
+		if(cnt_pix >= cnt_pix_r) begin
+			cnt_pix_r <= cnt_pix;
+		end
+		
+	end
+	assign href_pos = ~cmos_href_d2 & cmos_href_d1;
+	assign href_neg = cmos_href_d2 & ~cmos_href_d1;	
+	assign vsyn_pos = ~cmos_vsyn_d2 & cmos_vsyn_d1;
 	
 	
  	recv_cam inst_recv(
@@ -295,8 +322,8 @@ module vga_module
 
 	pll_133 inst_133m(
 	    .inclk0( clk_tmp80M ),
-		.c0( clk_100M ),   	// 100MHz
-		.c1( clk_133M  )    // 125MHz
+		.c0( clk_100M ),   	// 40
+		.c1( clk_133M  )    // 80MHz
 	);	 	
 	 /**************************************/
 	reset_gen inst_rst(
@@ -396,7 +423,7 @@ module vga_module
 			begin
 				case(st_wrsdram)
 					0 : begin
-						if(fifo_used >= 512 && wr_sdram_add[21:9] < 1536) begin
+						if(fifo_used >= 512 && wr_sdram_add[21:9] < 937) begin
 							st_wrsdram <= 1;
 							wr_sdram_req <= 1;
 //							wr_sdram_add[22] <= bank_switch;
@@ -428,13 +455,15 @@ module vga_module
 		.fifo_clear		(fifo_clear),
 		.data_vga		(data_vga),
 		.vga_rdfifo		(vga_rdfifo)
-	);
+	);	
 	
+	wire[19:0] digi;
+	assign digi =  cnt_ref_r[9:0]*1000 + cnt_pix_r[9:0] ;
 	 digitron inst_digi
 	(
 		.clk_i(CLK),
 		.rst_i(rst_100),
-		.num_i({7'h0,wr_sdram_add[21:9]}),
+		.num_i({9'h0,fifo_used[10:0]}),
 		.row_o(row_o),
 		.column_o(column_o)
 	);

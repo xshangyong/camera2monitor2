@@ -22,25 +22,8 @@ module vga_control_module
 	 output[5:0] Green_Sig;
 	 output[4:0] Blue_Sig;
 	 output is_pic;
-	 
-	 
-	 /**********************************/
-	//   resolution 1440*900   frame_rate 60Hz
-	//	   clk_fre = 84.960MHz
-	parameter H_SYN 		= 32;
-	parameter H_BKPORCH 	= 80;
-	parameter H_DATA 		= 1440;
-	parameter H_FTPORCH		= 48;
-	parameter H_TOTAL    	= 1600;
-
-
-	parameter V_SYN 		= 6;
-	parameter V_BKPORCH 	= 17;
-	parameter V_DATA 		= 900;
-	parameter V_FTPORCH		= 3;
-	parameter V_TOTAL    	= 926 ;
-
-	assign is_pic = (Row_Addr_Sig <= 768 && Column_Addr_Sig <= 1024) ? 1 : 0;
+	
+	assign is_pic = Ready_Sig ;//(Row_Addr_Sig <= 720 && Column_Addr_Sig <= 1024) ? 1 : 0;
 					
 
 	

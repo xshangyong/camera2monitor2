@@ -1,12 +1,12 @@
-  //sclk£¬sdinÊı¾İ´«ÊäÊ±Ğò´úÂë£¨i2cĞ´¿ØÖÆ´úÂë£©
-module i2c_com(clock_i2c,          //i2c¿ØÖÆ½Ó¿Ú´«ÊäËùĞèÊ±ÖÓ£¬0-400khz£¬´Ë´¦Îª20khz
+  //sclkï¼Œsdinæ•°æ®ä¼ è¾“æ—¶åºä»£ç ï¼ˆi2cå†™æ§åˆ¶ä»£ç ï¼‰
+module i2c_com(clock_i2c,          //i2cæ§åˆ¶æ¥å£ä¼ è¾“æ‰€éœ€æ—¶é’Ÿï¼Œ0-400khzï¼Œæ­¤å¤„ä¸º20khz
                camera_rstn,     
-               ack,              //Ó¦´ğĞÅºÅ
-               i2c_data,          //sdin½Ó¿Ú´«ÊäµÄ32Î»Êı¾İ
-               start,             //¿ªÊ¼´«Êä±êÖ¾
-               tr_end,           //´«Êä½áÊø±êÖ¾
-               i2c_sclk,          //FPGAÓëcamera iicÊ±ÖÓ½Ó¿Ú
-               i2c_sdat);         //FPGAÓëcamera iicÊı¾İ½Ó¿Ú
+               ack,              //åº”ç­”ä¿¡å·
+               i2c_data,          //sdinæ¥å£ä¼ è¾“çš„32ä½æ•°æ®
+               start,             //å¼€å§‹ä¼ è¾“æ ‡å¿—
+               tr_end,           //ä¼ è¾“ç»“æŸæ ‡å¿—
+               i2c_sclk,          //FPGAä¸camera iicæ—¶é’Ÿæ¥å£
+               i2c_sdat);         //FPGAä¸camera iicæ•°æ®æ¥å£
     input [31:0]i2c_data;
     input camera_rstn;
     input clock_i2c;
@@ -59,7 +59,7 @@ module i2c_com(clock_i2c,          //i2c¿ØÖÆ½Ó¿Ú´«ÊäËùĞèÊ±ÖÓ£¬0-400khz£¬´Ë´¦Îª20
        else
           case(cyc_count)
           0:begin ack1<=1;ack2<=1;ack3<=1;tr_end<=0;sclk<=1;reg_sdat<=1;end
-          1:reg_sdat<=0;                 //¿ªÊ¼´«Êä
+          1:reg_sdat<=0;                 //å¼€å§‹ä¼ è¾“
           2:sclk<=0;
           3:reg_sdat<=i2c_data[31];
           4:reg_sdat<=i2c_data[30];
@@ -69,7 +69,7 @@ module i2c_com(clock_i2c,          //i2c¿ØÖÆ½Ó¿Ú´«ÊäËùĞèÊ±ÖÓ£¬0-400khz£¬´Ë´¦Îª20
           8:reg_sdat<=i2c_data[26];
           9:reg_sdat<=i2c_data[25];
           10:reg_sdat<=i2c_data[24];
-          11:reg_sdat<=1;                //Ó¦´ğĞÅºÅ
+          11:reg_sdat<=1;                //åº”ç­”ä¿¡å·
           12:begin reg_sdat<=i2c_data[23];ack1<=i2c_sdat;end
           13:reg_sdat<=i2c_data[22];
           14:reg_sdat<=i2c_data[21];
@@ -78,7 +78,7 @@ module i2c_com(clock_i2c,          //i2c¿ØÖÆ½Ó¿Ú´«ÊäËùĞèÊ±ÖÓ£¬0-400khz£¬´Ë´¦Îª20
           17:reg_sdat<=i2c_data[18];
           18:reg_sdat<=i2c_data[17];
           19:reg_sdat<=i2c_data[16];
-          20:reg_sdat<=1;                //Ó¦´ğĞÅºÅ       
+          20:reg_sdat<=1;                //åº”ç­”ä¿¡å·       
           21:begin reg_sdat<=i2c_data[15];ack1<=i2c_sdat;end
           22:reg_sdat<=i2c_data[14];
           23:reg_sdat<=i2c_data[13];
@@ -87,7 +87,7 @@ module i2c_com(clock_i2c,          //i2c¿ØÖÆ½Ó¿Ú´«ÊäËùĞèÊ±ÖÓ£¬0-400khz£¬´Ë´¦Îª20
           26:reg_sdat<=i2c_data[10];
           27:reg_sdat<=i2c_data[9];
           28:reg_sdat<=i2c_data[8];
-          29:reg_sdat<=1;                //Ó¦´ğĞÅºÅ       
+          29:reg_sdat<=1;                //åº”ç­”ä¿¡å·       
           30:begin reg_sdat<=i2c_data[7];ack2<=i2c_sdat;end
           31:reg_sdat<=i2c_data[6];
           32:reg_sdat<=i2c_data[5];
@@ -96,7 +96,7 @@ module i2c_com(clock_i2c,          //i2c¿ØÖÆ½Ó¿Ú´«ÊäËùĞèÊ±ÖÓ£¬0-400khz£¬´Ë´¦Îª20
           35:reg_sdat<=i2c_data[2];
           36:reg_sdat<=i2c_data[1];
           37:reg_sdat<=i2c_data[0];
-          38:reg_sdat<=1;                //Ó¦´ğĞÅºÅ       
+          38:reg_sdat<=1;                //åº”ç­”ä¿¡å·       
           39:begin ack3<=i2c_sdat;sclk<=0;reg_sdat<=0;end
           40:sclk<=1;
           41:begin reg_sdat<=1;tr_end<=1;end

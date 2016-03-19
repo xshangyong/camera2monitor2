@@ -1,4 +1,4 @@
-//cameraÖĞ¼Ä´æÆ÷µÄÅäÖÃ³ÌĞò
+//cameraä¸­å¯„å­˜å™¨çš„é…ç½®ç¨‹åº
  module reg_config(     
 		  input clk_25M,
 		  input camera_rstn,
@@ -50,7 +50,7 @@ end
 
 
 
-//²úÉúi2c¿ØÖÆÊ±ÖÓ-20khz    
+//äº§ç”Ÿi2cæ§åˆ¶æ—¶é’Ÿ-20khz    
 always@(posedge clk_25M or negedge rst2)   
 begin
    if(!rst2) begin
@@ -65,7 +65,7 @@ begin
    end
 end
 
-//°´Å¥´¦Àí³ÌĞò	
+//æŒ‰é’®å¤„ç†ç¨‹åº	
 always @(posedge clock_20k or negedge rst2)
    if (!rst2) begin
 	    on_counter<=0;
@@ -74,22 +74,22 @@ always @(posedge clock_20k or negedge rst2)
 		 key_off<=1'b0;
 	  end
 	else begin
-	    if (key1==1'b1)                               //Èç¹û°´Å¥Ã»ÓĞ°´ÏÂ£¬¼Ä´æÆ÷Îª0
+	    if (key1==1'b1)                               //å¦‚æœæŒ‰é’®æ²¡æœ‰æŒ‰ä¸‹ï¼Œå¯„å­˜å™¨ä¸º0
 	       on_counter<=0;
-	    else if ((key1==1'b0)& (on_counter<=16'h00c8))        //Èç¹û°´Å¥°´ÏÂ²¢°´ÏÂÊ±¼äÉÙÓÚ10ms,¼ÆÊı      
+	    else if ((key1==1'b0)& (on_counter<=16'h00c8))        //å¦‚æœæŒ‰é’®æŒ‰ä¸‹å¹¶æŒ‰ä¸‹æ—¶é—´å°‘äº10ms,è®¡æ•°      
           on_counter<=on_counter+1'b1;
   	  
-       if (on_counter==16'h00c7)                 //Ò»´Î°´Å¥ÓĞĞ§£¬¸Ä±äÏÔÊ¾Ä£Ê½ 
+       if (on_counter==16'h00c7)                 //ä¸€æ¬¡æŒ‰é’®æœ‰æ•ˆï¼Œæ”¹å˜æ˜¾ç¤ºæ¨¡å¼ 
 			   key_on<=1'b1;
 		 else
 			   key_on<=1'b0;
 				
-	    if (key1==1'b0)                               //Èç¹û°´Å¥Ã»ÓĞÊÍ·Å£¬¼Ä´æÆ÷Îª0
+	    if (key1==1'b0)                               //å¦‚æœæŒ‰é’®æ²¡æœ‰é‡Šæ”¾ï¼Œå¯„å­˜å™¨ä¸º0
 	       off_counter<=0;
-	    else if ((key1==1'b1)& (off_counter<=16'h00c8))        //Èç¹û°´Å¥ÊÍ·Å²¢Ê±¼äÉÙÓÚ10ms,¼ÆÊı      
+	    else if ((key1==1'b1)& (off_counter<=16'h00c8))        //å¦‚æœæŒ‰é’®é‡Šæ”¾å¹¶æ—¶é—´å°‘äº10ms,è®¡æ•°      
           off_counter<=off_counter+1'b1;
   	  
-       if (off_counter==16'h00c7)                 //Ò»´Î°´Å¥ÓĞĞ§£¬¸Ä±äÏÔÊ¾Ä£Ê½ 
+       if (off_counter==16'h00c7)                 //ä¸€æ¬¡æŒ‰é’®æœ‰æ•ˆï¼Œæ”¹å˜æ˜¾ç¤ºæ¨¡å¼ 
 			   key_off<=1'b1;
 		 else
 			   key_off<=1'b0;				
@@ -97,7 +97,7 @@ always @(posedge clock_20k or negedge rst2)
      end 
 
 
-////iic¼Ä´æÆ÷ÅäÖÃ¹ı³Ì¿ØÖÆ    
+////iicå¯„å­˜å™¨é…ç½®è¿‡ç¨‹æ§åˆ¶    
 always@(posedge clock_20k or negedge rst2)    
 begin
    if(!rst2) begin
@@ -108,7 +108,7 @@ begin
 		 strobe_flash<=1'b0;
    end
    else begin
-      if(reg_conf_done_reg==1'b0) begin          //Èç¹ûcamera³õÊ¼»¯Î´Íê³É
+      if(reg_conf_done_reg==1'b0) begin          //å¦‚æœcameraåˆå§‹åŒ–æœªå®Œæˆ
 			 // if(reg_index<251) begin
 			  if(reg_index<302) begin
 					 case(config_step)
@@ -118,7 +118,7 @@ begin
 						config_step<=1;
 					 end
 					 1:begin
-						if(tr_end) begin                       //IIC·¢ËÍ½áÊø               					
+						if(tr_end) begin                       //IICå‘é€ç»“æŸ               					
 							 start<=0;
 							 config_step<=2;
 						end
@@ -132,17 +132,17 @@ begin
 			 else 
 				reg_conf_done_reg<=1'b1;
       end
-      else begin                                    //Èç¹ûcamera³õÊ¼»¯ÒÑÍê³É
+      else begin                                    //å¦‚æœcameraåˆå§‹åŒ–å·²å®Œæˆ
 	       case(config_step)
              0:begin
-				 	if(key_on==1'b1) begin                //°´¼ü°´ÏÂ,ÅäÖÃ¼Ä´æÆ÷Ê¹µÃÉÁ¹âµÆÁÁ
+				 	if(key_on==1'b1) begin                //æŒ‰é”®æŒ‰ä¸‹,é…ç½®å¯„å­˜å™¨ä½¿å¾—é—ªå…‰ç¯äº®
 						config_step<=1;
-						reg_index<=302;                    //´ÓµÚ300¿ªÊ¼Ğ´¼Ä´æÆ÷
+						reg_index<=302;                    //ä»ç¬¬300å¼€å§‹å†™å¯„å­˜å™¨
 						strobe_flash<=1'b1;
 					end
-					else if (key_off==1'b1) begin         //°´¼üËÉ¿ª,ÅäÖÃ¼Ä´æÆ÷Ê¹µÃÉÁ¹âµÆÃğ
+					else if (key_off==1'b1) begin         //æŒ‰é”®æ¾å¼€,é…ç½®å¯„å­˜å™¨ä½¿å¾—é—ªå…‰ç¯ç­
 						config_step<=1;
-						reg_index<=303;                    //´ÓµÚ304¿ªÊ¼Ğ´¼Ä´æÆ÷
+						reg_index<=303;                    //ä»ç¬¬304å¼€å§‹å†™å¯„å­˜å™¨
 						strobe_flash<=1'b0;
 					end
              end					
@@ -152,7 +152,7 @@ begin
 						config_step<=2;
              end
              2:begin
-               if(tr_end) begin                       //IIC·¢ËÍ½áÊø               					
+               if(tr_end) begin                       //IICå‘é€ç»“æŸ               					
 					    start<=0;
                    config_step<=3;
                end
@@ -166,7 +166,7 @@ begin
    end
  end
 			
-////iicĞèÒªÅäÖÃµÄ¼Ä´æÆ÷Öµ  			
+////iicéœ€è¦é…ç½®çš„å¯„å­˜å™¨å€¼  			
 always@(reg_index)   
  begin
     case(reg_index)
@@ -207,7 +207,7 @@ always@(reg_index)
 	 33:reg_data<=24'h363513;
 	 34:reg_data<=24'h363603;
 	 35:reg_data<=24'h363440;
-	 36:reg_data<=24'h362201; // 50/60Hz detection     50/60Hz µÆ¹âÌõÎÆ¹ıÂË
+	 36:reg_data<=24'h362201; // 50/60Hz detection     50/60Hz ç¯å…‰æ¡çº¹è¿‡æ»¤
 	 37:reg_data<=24'h3c0134;// Band auto, bit[7]
 	 38:reg_data<=24'h3c0428;// threshold low sum	 
 	 39:reg_data<=24'h3c0598;// threshold high sum
@@ -230,13 +230,13 @@ always@(reg_index)
 	 56:reg_data<=24'h430060;// RGB565
 	 57:reg_data<=24'h501f01;// ISP RGB 
 	 58:reg_data<=24'h440e00;
-	 59:reg_data<=24'h5000a7; // Lenc on, raw gamma on, BPC on, WPC on, CIP on // AEC target    ×Ô¶¯ÆØ¹â¿ØÖÆ
+	 59:reg_data<=24'h5000a7; // Lenc on, raw gamma on, BPC on, WPC on, CIP on // AEC target    è‡ªåŠ¨æ›å…‰æ§åˆ¶
 	 60:reg_data<=24'h3a0f30;// stable range in high
 	 61:reg_data<=24'h3a1028;// stable range in low
 	 62:reg_data<=24'h3a1b30;// stable range out high
 	 63:reg_data<=24'h3a1e26;// stable range out low
 	 64:reg_data<=24'h3a1160;// fast zone high
-	 65:reg_data<=24'h3a1f14;// fast zone low// Lens correction for ?   ¾µÍ·²¹³¥
+	 65:reg_data<=24'h3a1f14;// fast zone low// Lens correction for ?   é•œå¤´è¡¥å¿
 	 66:reg_data<=24'h580023;
 	 67:reg_data<=24'h580114;
 	 68:reg_data<=24'h58020f;
@@ -298,7 +298,7 @@ always@(reg_index)
 	 124:reg_data<=24'h583a26;
 	 125:reg_data<=24'h583b28;
 	 126:reg_data<=24'h583c42;
-	 127:reg_data<=24'h583dce;// lenc BR offset // AWB   ×Ô¶¯°×Æ½ºâ
+	 127:reg_data<=24'h583dce;// lenc BR offset // AWB   è‡ªåŠ¨ç™½å¹³è¡¡
 	 128:reg_data<=24'h5180ff;// AWB B block
 	 129:reg_data<=24'h5181f2;// AWB control 
 	 130:reg_data<=24'h518200;// [7:4] max local counter, [3:0] max fast counter
@@ -329,7 +329,7 @@ always@(reg_index)
 	 155:reg_data<=24'h519b00;
 	 156:reg_data<=24'h519c06;
 	 157:reg_data<=24'h519d82;
-	 158:reg_data<=24'h519e38;// AWB control // Gamma    Ù¤ÂêÇúÏß
+	 158:reg_data<=24'h519e38;// AWB control // Gamma    ä¼½ç›æ›²çº¿
 	 159:reg_data<=24'h548001;// Gamma bias plus on, bit[0] 
 	 160:reg_data<=24'h548108;
 	 161:reg_data<=24'h548214;
@@ -346,7 +346,7 @@ always@(reg_index)
 	 172:reg_data<=24'h548dcd;
 	 173:reg_data<=24'h548edd;
 	 174:reg_data<=24'h548fea;
-	 175:reg_data<=24'h54901d;// color matrix   É«²Ê¾ØÕó
+	 175:reg_data<=24'h54901d;// color matrix   è‰²å½©çŸ©é˜µ
 	 176:reg_data<=24'h53811e;// CMX1 for Y
 	 177:reg_data<=24'h53825b;// CMX2 for Y
 	 178:reg_data<=24'h538308;// CMX3 for Y
@@ -357,14 +357,14 @@ always@(reg_index)
 	 183:reg_data<=24'h53886c;// CMX8 for V
 	 184:reg_data<=24'h538910;// CMX9 for V
 	 185:reg_data<=24'h538a01;// sign[9]
-	 186:reg_data<=24'h538b98; // sign[8:1] // UV adjust   UVÉ«²Ê±¥ºÍ¶Èµ÷Õû
+	 186:reg_data<=24'h538b98; // sign[8:1] // UV adjust   UVè‰²å½©é¥±å’Œåº¦è°ƒæ•´
 	 187:reg_data<=24'h558006;// saturation on, bit[1]
 	 188:reg_data<=24'h558340;
 	 189:reg_data<=24'h558410;
 	 190:reg_data<=24'h558910;
 	 191:reg_data<=24'h558a00;
 	 192:reg_data<=24'h558bf8;
-	 193:reg_data<=24'h501d40;// enable manual offset of contrast// CIP  Èñ»¯ºÍ½µÔë 
+	 193:reg_data<=24'h501d40;// enable manual offset of contrast// CIP  é”åŒ–å’Œé™å™ª 
 	 194:reg_data<=24'h530008;// CIP sharpen MT threshold 1
 	 195:reg_data<=24'h530130;// CIP sharpen MT threshold 2
 	 196:reg_data<=24'h530210;// CIP sharpen MT offset 1
@@ -379,7 +379,7 @@ always@(reg_index)
 	 205:reg_data<=24'h530c06;// CIP sharpen TH offset 2
 	 206:reg_data<=24'h502500;
 	 207:reg_data<=24'h300802; // wake up from standby, bit[6]
-	 //640x480 30Ö¡/Ãë, night mode 5fps, input clock =24Mhz, PCLK =56Mhz
+	 //640x480 30å¸§/ç§’, night mode 5fps, input clock =24Mhz, PCLK =56Mhz
 	 208:reg_data<=24'h303511;// PLL
 	 209:reg_data<=24'h303646;// PLL
 	 210:reg_data<=24'h3c0708;// light meter 1 threshold [7:0]
