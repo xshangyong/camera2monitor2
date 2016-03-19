@@ -86,6 +86,24 @@ set_location_assignment	PIN_L7	-to cmos_data[5]
 set_location_assignment	PIN_M6	-to cmos_data[6]
 set_location_assignment	PIN_N8	-to cmos_data[7]
 
+
+set_location_assignment PIN_N16	-to row_o[0];
+set_location_assignment PIN_N15	-to row_o[1];
+set_location_assignment PIN_L16	-to row_o[2];
+set_location_assignment PIN_L14	-to row_o[3];
+set_location_assignment PIN_K16	-to row_o[4];
+set_location_assignment PIN_L15	-to row_o[5];
+set_location_assignment PIN_J16 -to row_o[6];
+set_location_assignment PIN_K15 -to row_o[7];
+
+set_location_assignment PIN_P15	-to column_o[5];
+set_location_assignment PIN_P16	-to column_o[4];
+set_location_assignment PIN_K12	-to column_o[3];
+set_location_assignment PIN_R16	-to column_o[2];
+set_location_assignment PIN_M11	-to column_o[1];
+set_location_assignment PIN_L13	-to column_o[0];
+
+
 # assigned by datasheet
 #set_location_assignment	PIN_M10	-to cmos_vsyn		
 #set_location_assignment	PIN_M9	-to cmos_href		

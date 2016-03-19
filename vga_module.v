@@ -30,7 +30,10 @@ module vga_module
 	cmos_href,
 	cmos_pclk,
 	cmos_xclk,
-	cmos_data	
+	cmos_data,
+	
+	row_o,
+	column_o
 );
 
 	input 	CLK;
@@ -70,6 +73,9 @@ module vga_module
     output   	cmos_xclk;
     input[7:0]  cmos_data;
 
+	// digitron
+	output[7:0]		row_o;
+	output[5:0]		column_o;
  	
 	/*************************************/
 	
@@ -165,6 +171,12 @@ module vga_module
 	wire[15:0]	data_16b;
 	wire		data_16b_en;
 	reg			bank_switch = 0;
+	
+	
+	assign led_o1 =  wr_sdram_add[21:9] ==  0 ? 1 : 0; 
+	assign led_o2 =  wr_sdram_add[21:9] >=  50  ? 1 : 0; 
+	assign led_o3 =  wr_sdram_add[21:9] >=  100 ? 1 : 0; 
+	assign led_o4 =  wr_sdram_add[21:9] >=  250 ? 1 : 0; 
 	/*	//..//..//..//..//   test code  begin
 	assign led_o1 =  cnt_pix >  2048 ? 1 : 0;
 	assign led_o2 =  cnt_pix ==  2048 ? 1 : 0;
@@ -342,7 +354,7 @@ module vga_module
 						if( rd_fifo_used <= 512 ) begin
 							st_rdsdram <= 1;
 							rd_sdram_req <= 1;
-							rd_sdram_add[22] <= ~bank_switch;
+//							rd_sdram_add[22] <= ~bank_switch;
 						end
 					end	
 					1 : begin
@@ -375,18 +387,19 @@ module vga_module
 			st_wrsdram     <= 0;
 		end
 		else begin
-			if(vsyn_pos == 0) begin
-				st_wrsdram <= 0;
-				wr_sdram_add <= 0;
-				wr_sdram_req <= 0;
-			end
-			else begin
+//			if(vsyn_pos == 1) begin
+//				st_wrsdram <= 0;
+//				wr_sdram_add <= 0;
+//				wr_sdram_req <= 0;
+//			end
+//			else 
+			begin
 				case(st_wrsdram)
 					0 : begin
-						if(fifo_used >= 512) begin
+						if(fifo_used >= 512 && wr_sdram_add[21:9] < 1536) begin
 							st_wrsdram <= 1;
 							wr_sdram_req <= 1;
-							wr_sdram_add[22] <= bank_switch;
+//							wr_sdram_add[22] <= bank_switch;
 						end
 					end	
 					1 : begin
@@ -417,6 +430,14 @@ module vga_module
 		.vga_rdfifo		(vga_rdfifo)
 	);
 	
+	 digitron inst_digi
+	(
+		.clk_i(CLK),
+		.rst_i(rst_100),
+		.num_i({7'h0,wr_sdram_add[21:9]}),
+		.row_o(row_o),
+		.column_o(column_o)
+	);
 
 	
 	 always@(posedge clk_100M)begin
