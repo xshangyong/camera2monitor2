@@ -74,7 +74,7 @@ module camera_cfg
 		else begin
 			if(reg_conf_done_reg==1'b0) begin          //如果camera初始化未完成
 				 // if(reg_index<251) begin
-				  if(reg_index<302) begin
+				  if(reg_index<304) begin
 						 case(config_step)
 						 0:begin
 							i2c_data<={8'h78,reg_data};       //IIC Device address is 0x78   
@@ -414,11 +414,13 @@ module camera_cfg
 				 299:reg_data<=24'h350300; // AEC/AGC on 
 				 300:reg_data<=24'h301602; //Strobe output enable
 				 301:reg_data<=24'h3b070a; //FREX strobe mode1	
+				 302:reg_data<=24'h503d80;
+				 303:reg_data<=24'h474100; 
 				 //strobe flash and frame exposure 	 
-				 302:reg_data<=24'h3b0083;              //STROBE CTRL: strobe request ON, Strobe mode: LED3 
-				 303:reg_data<=24'h3b0000;              //STROBE CTRL: strobe request OFF 
-				 304:reg_data<=24'h303521;				// set PCLK 84MHz
-				
+				 304:reg_data<=24'h3b0083;              //STROBE CTRL: strobe request ON, Strobe mode: LED3 
+				 305:reg_data<=24'h3b0000;              //STROBE CTRL: strobe request OFF 
+				 306:reg_data<=24'h303521;				// set PCLK 84MHz
+				 
 				// 302:reg_data<=24'h503d80;            //reg_data<=24'h503d80; test pattern selection control, 80:color bar,00: test disable
 				// 303:reg_data<=24'h474101;            //reg_data<=24'h47401; test pattern enable, Test pattern 8-bit	 
 				 default:reg_data<=24'h000000;

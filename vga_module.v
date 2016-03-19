@@ -375,7 +375,7 @@ module vga_module
 			st_wrsdram     <= 0;
 		end
 		else begin
-			if(VSYNC_Sig_d1 == 0) begin
+			if(vsyn_pos == 0) begin
 				st_wrsdram <= 0;
 				wr_sdram_add <= 0;
 				wr_sdram_req <= 0;
@@ -417,33 +417,8 @@ module vga_module
 		.vga_rdfifo		(vga_rdfifo)
 	);
 	
-	
-//	assign to_dig[19:0] = test_rdsdram[2:0]+test_rdsdram[5:3]*10+test_rdsdram[8:6]*100+test_rdsdram[11:9]*1000+test_rdsdram[14:12]*10000+test_rdsdram[17:15]*100000;
-	   
-	   
-	   
-
-	 
 
 	
-
-	 
-	/*
-	 always@(posedge CLK)begin
-		if(ps2_done_r == 1) begin
-			if(ps2_break_r == 2'b01) begin
-				 led_r1 <= 1;
-				 led_r2 <= 0;
-				 led_r3 <= 0;
-			end
-			else if(ps2_break_r == 2'b10) begin
-				 led_r1 <= 0;
-				 led_r2 <= 1;
-				 led_r3 <= 0;
-		   end
-		end
-	 end
-	*/
 	 always@(posedge clk_100M)begin
 		  VSYNC_Sig<= VSYNC_Sig_d1;
 		  HSYNC_Sig<= HSYNC_Sig_d1;
@@ -465,7 +440,7 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig;
 	sync_module inst_sync
 	(
 		.CLK( clk_100M ),
-		.RSTn( rst_vgasyn2  ), //rst_100
+		.RSTn( cfg_done  ), //rst_100
 		.VSYNC_Sig( VSYNC_Sig_d1 ),   // output - to top
 		.HSYNC_Sig( HSYNC_Sig_d1 ),   // output - to top
 		.Column_Addr_Sig( Column_Addr_Sig ), // output - to inst_vga_control
@@ -479,7 +454,7 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig;
 	 (
 	      .CLK( clk_100M ),
 		  .RSTn( cfg_done ), //rst_100
-		  .Ready_Sig( rst_vgasyn2 ),             // input - from inst_sync
+		  .Ready_Sig( Ready_Sig ),             // input - from inst_sync
 		  .Column_Addr_Sig( Column_Addr_Sig ), // input - from inst_sync
 		  .Row_Addr_Sig( Row_Addr_Sig ),       // input - from inst_sync
 		  .Red_Sig( Red_Sig[4:0] ),      // output - to top
