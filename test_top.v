@@ -1,6 +1,10 @@
 `timescale 1 ns / 1 ps
 module test_top();
 
+
+
+	parameter	ROW = 720;
+	parameter	COL = 1024;
 	reg 	CLK;
 	reg		RSTn,ps2_clk_i,ps2_data_i;
 
@@ -35,7 +39,7 @@ module test_top();
 	
 	reg[31:0] cnt = 0;
 	reg[31:0] cnt_row = 0;
-	
+	reg[31:0] cnt_pix = 0;
 	initial begin
 		RSTn = 1;
 		CLK = 0;
@@ -56,7 +60,7 @@ module test_top();
 	
 	always @(posedge cmos_pclk) begin
 		if(cnt == 5596992) begin
-			cnt <= 0;
+			cnt <= cnt;
 		end
 		else begin
 			cnt <= cnt + 1;
@@ -69,15 +73,23 @@ module test_top();
 			cmos_vsyn <= 0;
 		end
 		
-		if(cnt > 100) begin
-			if(cnt == 110) begin
-				cmos_href <= 1;
-			end
-			cmos_data <= cmos_data + 1;
-			if(cnt == 7279) begin
+		if(cmos_vsyn == 0 && cnt_row < ROW) begin
+			if(cnt_pix == 2148 ) begin
+				cnt_row <= cnt_row + 1;
+				cnt_pix <= 0;
 				cmos_href <= 0;
-				cmos_data <= 0;
 			end
+			else begin
+				cnt_pix <= cnt_pix + 1;
+				if(cnt_pix < 100) begin
+					cmos_href <= 0;
+				end
+				else begin
+					cmos_href <= 1;
+					cmos_data <= cnt_pix[7:0];
+				end
+			end
+			
 		end
 	end
 	
