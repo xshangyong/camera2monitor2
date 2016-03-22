@@ -66,7 +66,7 @@ module test_top();
 			cnt <= cnt + 1;
 		end
 		
-		if( cnt >= 0 && cnt <= 100) begin
+		if( cnt >= 0 && cnt <= 2600) begin  // after  sdram initialized
 			cmos_vsyn <= 1;
 		end
 		else begin
@@ -93,7 +93,23 @@ module test_top();
 		end
 	end
 	
-
+	reg flag = 0;
+	int file;
+	reg[7:0]	data_d1 = 0;
+	always @(posedge cmos_pclk) begin 
+		if(cmos_vsyn == 0 &&cmos_href == 1) begin
+			if(flag == 0) begin
+				data_d1[7:0] <= cmos_data[7:0];
+				flag <= 1;
+			end
+			else begin
+				file = $fopen("./src.txt");
+				fwrite(file,"%h %h\n",data_d1[7:0],cmos_data[7:0]);
+				fclose(file);
+			end
+		end
+	end
+	
 	
 	vga_module dut
 	(

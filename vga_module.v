@@ -237,6 +237,10 @@ module vga_module
 	assign href_neg = cmos_href_d2 & ~cmos_href_d1;	
 	assign vsyn_pos = ~cmos_vsyn_d2 & cmos_vsyn_d1;
 
+			wire vsyn3;
+		assign vsyn3 = (cnt_vsyn==3 && cfg_done==1) ? 1 : 0;
+
+		
 	always@(posedge cmos_pclk)begin
 		cmos_href_d1 <= cmos_href;
 		cmos_href_d2 <= cmos_href_d1;
@@ -244,8 +248,14 @@ module vga_module
 		cmos_vsyn_d2 <= cmos_vsyn_d1;
 		
 		if(vsyn_pos == 1) begin
-			cnt_vsyn <= cnt_vsyn + 1;
+			if(cnt_vsyn == 3) begin
+				cnt_vsyn <= cnt_vsyn;
+			end
+			else begin
+				cnt_vsyn <= cnt_vsyn + 1;
+			end
 		end
+		
 		
 		if(vsyn_pos == 1) begin
 			cnt_ref <= 0;
@@ -277,7 +287,7 @@ module vga_module
 		.cmos_data	(cmos_data),
 		.cmos_pclk	(cmos_pclk),
 		.cmos_href	(cmos_href),
-		.cfg_done	(cfg_done),
+		.cfg_done	(vsyn3 ),
 		.data_16b	(data_16b),
 		.data_16b_en(data_16b_en)
 	);
@@ -383,7 +393,7 @@ module vga_module
 			else begin
 				case(rd_sdram_req)
 					0 : begin
-						if( rd_fifo_used <= 512 ) begin
+						if( rd_fifo_used <= 512 && rd_sdram_add[21:9] < 1440) begin
 							st_rdsdram <= 1;
 							rd_sdram_req <= 1;
 //							rd_sdram_add[22] <= ~bank_switch;
@@ -478,7 +488,7 @@ module vga_module
 		  VSYNC_Sig<= VSYNC_Sig_d1;
 		  HSYNC_Sig<= HSYNC_Sig_d1;
 	 end
-assign  fifo_clear  = VSYNC_Sig_d1 & ~VSYNC_Sig;  //negadge
+assign  fifo_clear  = ~VSYNC_Sig_d1;   
 assign  vsyn_neg    = VSYNC_Sig_d1 & ~VSYNC_Sig;  //negadge
 assign  vga_rdfifo 	= is_pic & Ready_Sig;
 	 
@@ -492,23 +502,24 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig;
 		rst_vgasyn2 <= rst_vgasyn1;
 	end
 	
+	wire	rst_tmp = wr_sdram_add[21:9] >= 1440 ? 1 : 0;
 	sync_module inst_sync
 	(
 		.CLK( clk_100M ),
-		.RSTn( cfg_done  ), //rst_100
+		.RSTn( rst_tmp  ), //rst_100
 		.VSYNC_Sig( VSYNC_Sig_d1 ),   // output - to top
 		.HSYNC_Sig( HSYNC_Sig_d1 ),   // output - to top
 		.Column_Addr_Sig( Column_Addr_Sig ), // output - to inst_vga_control
 		.Row_Addr_Sig( Row_Addr_Sig ),       // output - to inst_vga_control
 		.Ready_Sig( Ready_Sig )              // output - to inst_vga_control
 	);
-	 
+	
 	 /******************************************/
 	 
 	 vga_control_module inst_vga_control
 	 (
 	      .CLK( clk_100M ),
-		  .RSTn( cfg_done ), //rst_100
+		  .RSTn( rst_tmp ), //rst_100
 		  .Ready_Sig( Ready_Sig ),             // input - from inst_sync
 		  .Column_Addr_Sig( Column_Addr_Sig ), // input - from inst_sync
 		  .Row_Addr_Sig( Row_Addr_Sig ),       // input - from inst_sync
