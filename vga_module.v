@@ -33,7 +33,9 @@ module vga_module
 	cmos_data,
 	
 	row_o,
-	column_o
+	column_o,
+	
+	clk_100M
 );
 
 	input 	CLK;
@@ -78,10 +80,10 @@ module vga_module
 	output[5:0]		column_o;
  	
 	/*************************************/
+	output 			clk_100M;
 	
 	wire 			VSYNC_Sig_d1;
 	wire 			HSYNC_Sig_d1;
-	wire 			clk_100M;
 	wire [10:0]		Column_Addr_Sig;
 	wire [10:0]		Row_Addr_Sig;
 	wire 			Ready_Sig;
@@ -287,7 +289,7 @@ module vga_module
 		.cmos_data	(cmos_data),
 		.cmos_pclk	(cmos_pclk),
 		.cmos_href	(cmos_href),
-		.cfg_done	(vsyn3 ),
+		.cfg_done	(cfg_done),
 		.data_16b	(data_16b),
 		.data_16b_en(data_16b_en)
 	);
@@ -393,7 +395,7 @@ module vga_module
 			else begin
 				case(rd_sdram_req)
 					0 : begin
-						if( rd_fifo_used <= 512 && rd_sdram_add[21:9] < 1440) begin
+						if( rd_fifo_used <= 512 && rd_sdram_add[21:9] < 938) begin
 							st_rdsdram <= 1;
 							rd_sdram_req <= 1;
 //							rd_sdram_add[22] <= ~bank_switch;
@@ -438,7 +440,7 @@ module vga_module
 			begin
 				case(wr_sdram_req)
 					0 : begin
-						if(fifo_used >= 512 && wr_sdram_add[21:9] < 1440) begin
+						if(fifo_used >= 512 && wr_sdram_add[21:9] < 938) begin
 							st_wrsdram <= 1;
 							wr_sdram_req <= 1;
 //							wr_sdram_add[22] <= bank_switch;
@@ -502,10 +504,10 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig;
 		rst_vgasyn2 <= rst_vgasyn1;
 	end
 	
-	wire	rst_tmp = wr_sdram_add[21:9] >= 1440 ? 1 : 0;
+	wire	rst_tmp = wr_sdram_add[21:9] >= 938 ? 1 : 0;
 	sync_module inst_sync
 	(
-		.CLK( clk_100M ),
+		.CLK( CLK ),
 		.RSTn( rst_tmp  ), //rst_100
 		.VSYNC_Sig( VSYNC_Sig_d1 ),   // output - to top
 		.HSYNC_Sig( HSYNC_Sig_d1 ),   // output - to top
@@ -518,7 +520,7 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig;
 	 
 	 vga_control_module inst_vga_control
 	 (
-	      .CLK( clk_100M ),
+	      .CLK( CLK ),
 		  .RSTn( rst_tmp ), //rst_100
 		  .Ready_Sig( Ready_Sig ),             // input - from inst_sync
 		  .Column_Addr_Sig( Column_Addr_Sig ), // input - from inst_sync

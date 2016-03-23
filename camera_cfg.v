@@ -74,7 +74,7 @@ module camera_cfg
 		else begin
 			if(reg_conf_done_reg==1'b0) begin          //如果camera初始化未完成
 				 // if(reg_index<251) begin
-				  if(reg_index<304) begin
+				  if(reg_index<253) begin
 						 case(config_step)
 						 0:begin
 							i2c_data<={8'h78,reg_data};       //IIC Device address is 0x78   
@@ -361,61 +361,9 @@ module camera_cfg
 				 248:reg_data<=24'h382402; // DVP CLK divider 
 				 249:reg_data<=24'h5001a3; // SDE on, scale on, UV average off, color matrix on, AWB on
 				 250:reg_data<=24'h350300; // AEC/AGC on 
-				 
-				 //set OV5640 to video mode 720p 
-				 251:reg_data<=24'h303541;// PLL     input clock =24Mhz, PCLK =84Mhz
-				 252:reg_data<=24'h303669;// PLL
-				 253:reg_data<=24'h3c0707; // lightmeter 1 threshold[7:0]
-				 254:reg_data<=24'h382041; // flip
-				 255:reg_data<=24'h382107; // mirror
-				 256:reg_data<=24'h381431; // timing X inc
-				 257:reg_data<=24'h381531; // timing Y inc
-				 258:reg_data<=24'h380000; // HS
-				 259:reg_data<=24'h380100; // HS
-				 260:reg_data<=24'h380200; // VS
-				 261:reg_data<=24'h3803fa; // VS
-				 262:reg_data<=24'h38040a; // HW (HE)
-				 263:reg_data<=24'h38053f; // HW (HE)
-				 264:reg_data<=24'h380606; // VH (VE)
-				 265:reg_data<=24'h3807a9; // VH (VE)
-				 266:reg_data<=24'h380804; // DVPHO     (1280)->1024   	1024
-				 267:reg_data<=24'h380900; // DVPHO     (1280)->1024
-				 268:reg_data<=24'h380a02; // DVPVO     (720)->			720
-				 269:reg_data<=24'h380bd0; // DVPVO     (720)->
-				 270:reg_data<=24'h380c07; // HTS
-				 271:reg_data<=24'h380d64; // HTS
-				 272:reg_data<=24'h380e02; // VTS
-				 273:reg_data<=24'h380fe4; // VTS
-				 274:reg_data<=24'h381304; // timing V offset
-				 275:reg_data<=24'h361800;
-				 276:reg_data<=24'h361229;
-				 277:reg_data<=24'h370952;
-				 278:reg_data<=24'h370c03;
-				 279:reg_data<=24'h3a0202; // 60Hz max exposure
-				 280:reg_data<=24'h3a03e0; // 60Hz max exposure
-				 281:reg_data<=24'h3a0800; // B50 step
-				 282:reg_data<=24'h3a096f; // B50 step
-				 283:reg_data<=24'h3a0a00; // B60 step
-				 284:reg_data<=24'h3a0b5c; // B60 step
-				 285:reg_data<=24'h3a0e06; // 50Hz max band
-				 286:reg_data<=24'h3a0d08; // 60Hz max band
-				 287:reg_data<=24'h3a1402; // 50Hz max exposure
-				 288:reg_data<=24'h3a15e0; // 50Hz max exposure
-				 289:reg_data<=24'h400402; // BLC line number
-				 290:reg_data<=24'h30021c; // reset JFIFO, SFIFO, JPG
-				 291:reg_data<=24'h3006c3; // disable clock of JPEG2x, JPEG
-				 292:reg_data<=24'h471303; // JPEG mode 3
-				 293:reg_data<=24'h440704; // Quantization sacle
-				 294:reg_data<=24'h460b37;
-				 295:reg_data<=24'h460c20;
-				 296:reg_data<=24'h483716; // MIPI global timing
-				 297:reg_data<=24'h382404; // PCLK manual divider
-				 298:reg_data<=24'h500183; // SDE on, CMX on, AWB on
-				 299:reg_data<=24'h350300; // AEC/AGC on 
-				 300:reg_data<=24'h301602; //Strobe output enable
-				 301:reg_data<=24'h3b070a; //FREX strobe mode1	
-				 302:reg_data<=24'h503d80;
-				 303:reg_data<=24'h474100; 
+				 251:reg_data<=24'h503d80;
+				 252:reg_data<=24'h474100; 
+				
 				 //strobe flash and frame exposure 	 
 				 304:reg_data<=24'h3b0083;              //STROBE CTRL: strobe request ON, Strobe mode: LED3 
 				 305:reg_data<=24'h3b0000;              //STROBE CTRL: strobe request OFF 

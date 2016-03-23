@@ -128,7 +128,7 @@ module reset_gen
 	
 	
 	
-	assign rst_use = rst & rst_init;
+	assign rst_use = rst_init;
 	
 	always @(posedge clk_100) begin
 		rst_100b <= rst_use;

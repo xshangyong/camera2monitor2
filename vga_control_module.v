@@ -23,7 +23,7 @@ module vga_control_module
 	 output[4:0] Blue_Sig;
 	 output is_pic;
 	
-	assign is_pic = (Row_Addr_Sig <= 720 && Column_Addr_Sig <= 1024 && Row_Addr_Sig >= 1 && Column_Addr_Sig >= 1)  ? 1 : 0;
+	assign is_pic = (Row_Addr_Sig <= 600 && Column_Addr_Sig <= 800 && Row_Addr_Sig >= 1 && Column_Addr_Sig >= 1)  ? 1 : 0;
 	
 	// is_pic read fifo ,data valid delay 1 clk cycle
 	reg	ispic_d1 = 0;			
@@ -36,9 +36,9 @@ module vga_control_module
 		end
 	end
 	
-	assign Red_Sig[4:0]   = Ready_Sig && ispic_d1 ? display_data[15:11] : 5'b11111;
-	assign Green_Sig[5:0] = Ready_Sig && ispic_d1 ? display_data[10:5]  : 6'b111111;
-	assign Blue_Sig[4:0]  = Ready_Sig && ispic_d1 ? display_data[4:0]   : 5'b11111;
+	assign Red_Sig[4:0]   = Ready_Sig && ispic_d1 ? display_data[15:11] : 0;
+	assign Green_Sig[5:0] = Ready_Sig && ispic_d1 ? display_data[10:5]  : 0;
+	assign Blue_Sig[4:0]  = Ready_Sig && ispic_d1 ? display_data[4:0]   : 0;
 	 
 	 
 

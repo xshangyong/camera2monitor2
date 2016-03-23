@@ -37,6 +37,7 @@ module test_top();
 	wire		cmos_xclk;
 	reg[7:0]	cmos_data;
 	
+	wire		clk_vga;
 	reg[31:0] cnt = 0;
 	reg[31:0] cnt_row = 0;
 	reg[31:0] cnt_pix = 0;
@@ -86,7 +87,7 @@ module test_top();
 				end
 				else begin
 					cmos_href <= 1;
-					cmos_data <= cnt_pix[7:0];
+					cmos_data <= $random() % 9'h100;
 				end
 			end
 			
@@ -103,13 +104,34 @@ module test_top();
 				flag <= 1;
 			end
 			else begin
-				file = $fopen("./src.txt");
-				fwrite(file,"%h %h\n",data_d1[7:0],cmos_data[7:0]);
-				fclose(file);
+				file = $fopen("./src.txt","a");
+				$fwrite(file,"%h %h\n",data_d1[7:0],cmos_data[7:0]);
+				$fclose(file);
+				flag <= 0;
 			end
 		end
 	end
+	wire pos;	
+	reg vsyn_d1,vsyn_d2;
+	reg[31:0]	cnt2 = 0;
 	
+	always @(Red_Sig or Green_Sig or Blue_Sig) begin 
+		if(cnt2 <= 1 && ({Red_Sig[4:0],Green_Sig[5:0],Blue_Sig[4:0]} != 16'hffff)) begin
+			file = $fopen("./des.txt","a");
+			$fwrite(file,"%h %h\n",{Red_Sig[4:0],Green_Sig[5:3]},{Green_Sig[2:0],Blue_Sig[4:0]});
+			$fclose(file);
+		end
+	end
+	always @( posedge clk_vga) begin
+		vsyn_d1 <=	VSYNC_Sig;
+		vsyn_d2	<=	vsyn_d1; 
+		
+		if(pos == 1) begin
+			cnt2 <= cnt2 + 1;
+		end
+	end
+
+	assign pos = ~vsyn_d2 && vsyn_d1;
 	
 	vga_module dut
 	(
@@ -139,7 +161,8 @@ module test_top();
 		.led_o3     (led_o3   	),
 		.cmos_pclk	(cmos_pclk	),
 		.cmos_xclk	(cmos_xclk	),
-		.cmos_data	(cmos_data	)
+		.cmos_data	(cmos_data	),
+		.clk_100M	(clk_vga)
 	);
 	
 	sdram inst_sdram
