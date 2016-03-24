@@ -242,23 +242,33 @@ module vga_module
 			wire vsyn3;
 		assign vsyn3 = (cnt_vsyn==3 && cfg_done==1) ? 1 : 0;
 
+	always@(posedge clk_133M)begin
 		
+	end
+
+	
 	always@(posedge cmos_pclk)begin
-		cmos_href_d1 <= cmos_href;
-		cmos_href_d2 <= cmos_href_d1;
+		if(!RSTn) begin
+			cnt_vsyn  <= 0;
+			cnt_ref   <= 0;
+			cnt_ref   <= 0;
+			cnt_pix   <= 0;
+			cnt_pix_r <= 0;
+		end
 		cmos_vsyn_d1 <= cmos_vsyn;
 		cmos_vsyn_d2 <= cmos_vsyn_d1;
+		cmos_href_d1 <= cmos_href;
+		cmos_href_d2 <= cmos_href_d1;
 		
 		if(vsyn_pos == 1) begin
-			if(cnt_vsyn == 3) begin
+			if(cnt_vsyn == 30) begin
 				cnt_vsyn <= cnt_vsyn;
 			end
 			else begin
 				cnt_vsyn <= cnt_vsyn + 1;
 			end
 		end
-		
-		
+	
 		if(vsyn_pos == 1) begin
 			cnt_ref <= 0;
 			cnt_ref_r <= cnt_ref;
@@ -268,20 +278,13 @@ module vga_module
 				cnt_ref <= cnt_ref + 1;
 			end
 		end
-		
 		if(href_neg == 1) begin
 			cnt_pix <= 0;
 			cnt_pix_r <= cnt_pix;
-
 		end
 		else if(cmos_href == 1) begin
 			cnt_pix <= cnt_pix + 1;
 		end
-		
-		if(cnt_pix >= cnt_pix_r) begin
-			cnt_pix_r <= cnt_pix;
-		end
-		
 	end
 	
 	
@@ -395,7 +398,7 @@ module vga_module
 			else begin
 				case(rd_sdram_req)
 					0 : begin
-						if( rd_fifo_used <= 512 && rd_sdram_add[21:9] < 938) begin
+						if( rd_fifo_used <= 512 && rd_sdram_add[21:9] < 750) begin
 							st_rdsdram <= 1;
 							rd_sdram_req <= 1;
 //							rd_sdram_add[22] <= ~bank_switch;
@@ -411,8 +414,9 @@ module vga_module
 				endcase
 			end
 		end
-	   end
-		
+	end
+	
+
 	// write sdram, wr_sdram_req high means write begins,ack high means write finished 
 	// start when fifo_used >= 512
 	always@(posedge cmos_pclk)begin
@@ -431,16 +435,16 @@ module vga_module
 			st_wrsdram     <= 0;
 		end
 		else begin
-//			if(vsyn_pos == 1) begin
-//				st_wrsdram <= 0;
-//				wr_sdram_add <= 0;
-//				wr_sdram_req <= 0;
-//			end
-//			else 
+			if(cnt_vsyn < 20) begin
+				st_wrsdram <= 0;
+				wr_sdram_add <= 0;
+				wr_sdram_req <= 0;
+			end
+			else 
 			begin
 				case(wr_sdram_req)
 					0 : begin
-						if(fifo_used >= 512 && wr_sdram_add[21:9] < 938) begin
+						if(fifo_used >= 512 && cnt_vsyn == 20 ) begin
 							st_wrsdram <= 1;
 							wr_sdram_req <= 1;
 //							wr_sdram_add[22] <= bank_switch;
@@ -459,6 +463,16 @@ module vga_module
 		end
    end
 
+   	reg	wr_req_d1;
+	reg[31:0] cnt_req = 0;
+	always@(posedge clk_133M)begin
+		wr_req_d1 <=  wr_sdram_req;
+		if(wr_sdram_req == 1 && wr_req_d1 == 0) begin
+			cnt_req <= cnt_req + 1;
+		end
+	end	
+	
+	
 	fifo2vga	inst_fifo2vga
 	(
 		.clk_133M_i		(clk_133M),
@@ -475,12 +489,14 @@ module vga_module
 	);	
 	
 	wire[19:0] digi;
-	assign digi =  cnt_ref_r[9:0]*1000 + cnt_pix_r[11:2] ;
-	 digitron inst_digi
+//	assign digi =  cnt_ref_r[9:0]*1000 + cnt_pix_r[11:2] ;
+	assign digi =  cnt_ref_r[9:0]*1000 + wr_sdram_add[18:9] ;
+	
+	digitron inst_digi
 	(
 		.clk_i(CLK),
 		.rst_i(rst_100),
-		.num_i({7'h0,wr_sdram_add[21:9]}),
+		.num_i(digi),
 		.row_o(row_o),
 		.column_o(column_o)
 	);
@@ -504,10 +520,10 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig;
 		rst_vgasyn2 <= rst_vgasyn1;
 	end
 	
-	wire	rst_tmp = wr_sdram_add[21:9] >= 938 ? 1 : 0;
+	wire	rst_tmp = wr_sdram_add[21:9] >= 750 ? 1 : 0;
 	sync_module inst_sync
 	(
-		.CLK( CLK ),
+		.CLK( clk_100M ),
 		.RSTn( rst_tmp  ), //rst_100
 		.VSYNC_Sig( VSYNC_Sig_d1 ),   // output - to top
 		.HSYNC_Sig( HSYNC_Sig_d1 ),   // output - to top
@@ -520,7 +536,7 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig;
 	 
 	 vga_control_module inst_vga_control
 	 (
-	      .CLK( CLK ),
+	      .CLK( clk_100M ),
 		  .RSTn( rst_tmp ), //rst_100
 		  .Ready_Sig( Ready_Sig ),             // input - from inst_sync
 		  .Column_Addr_Sig( Column_Addr_Sig ), // input - from inst_sync

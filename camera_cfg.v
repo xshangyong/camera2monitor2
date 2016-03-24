@@ -74,7 +74,7 @@ module camera_cfg
 		else begin
 			if(reg_conf_done_reg==1'b0) begin          //如果camera初始化未完成
 				 // if(reg_index<251) begin
-				  if(reg_index<253) begin
+				  if(reg_index<240) begin
 						 case(config_step)
 						 0:begin
 							i2c_data<={8'h78,reg_data};       //IIC Device address is 0x78   
@@ -311,9 +311,9 @@ module camera_cfg
 				 205:reg_data<=24'h530c06;// CIP sharpen TH offset 2
 				 206:reg_data<=24'h502500;
 				 207:reg_data<=24'h300802; // wake up from standby, bit[6]
-				 //640x480 30�� night mode 5fps, input clock =24Mhz, PCLK =56Mhz
-				 208:reg_data<=24'h303511;// PLL
-				 209:reg_data<=24'h303646;// PLL
+				 //800x480 15fps  45.6MHz
+				 208:reg_data<=24'h303541;// PLL
+				 209:reg_data<=24'h303672;// PLL
 				 210:reg_data<=24'h3c0708;// light meter 1 threshold [7:0]
 				 211:reg_data<=24'h382041;// Sensor flip off, ISP flip on
 				 212:reg_data<=24'h382107;// Sensor mirror on, ISP mirror on, H binning on
@@ -322,26 +322,31 @@ module camera_cfg
 				 215:reg_data<=24'h380000;// HS: X address i2c_req high byte
 				 216:reg_data<=24'h380100;// HS: X address i2c_req low byte
 				 217:reg_data<=24'h380200;// VS: Y address i2c_req high byte
-				 218:reg_data<=24'h380304;// VS: Y address i2c_req high byte 
+				 218:reg_data<=24'h3803be;// VS: Y address i2c_req high byte 
 				 219:reg_data<=24'h38040a;// HW (HE)         
 				 220:reg_data<=24'h38053f;// HW (HE)
-				 221:reg_data<=24'h380607;// VH (VE)         
-				 222:reg_data<=24'h38079b;// VH (VE)      
+				 221:reg_data<=24'h380606;// VH (VE)         
+				 222:reg_data<=24'h3807e4;// VH (VE)      
 				 223:reg_data<=24'h380803;// DVPHO  
 				 224:reg_data<=24'h380920;// DVPHO
-				 225:reg_data<=24'h380a02;// DVPVO
-				 226:reg_data<=24'h380b58;// DVPVO
+				 225:reg_data<=24'h380a01;// DVPVO
+				 226:reg_data<=24'h380be0;// DVPVO
 				 227:reg_data<=24'h380c07;// HTS            //Total horizontal size 800
-				 228:reg_data<=24'h380d68;// HTS
+				 228:reg_data<=24'h380d69;// HTS
 				 229:reg_data<=24'h380e03;// VTS            //total vertical size 500
-				 230:reg_data<=24'h380fd8;// VTS 
+				 230:reg_data<=24'h380f21;// VTS 
 				 231:reg_data<=24'h381306;// Timing Voffset 
 				 232:reg_data<=24'h361800;
 				 233:reg_data<=24'h361229;
 				 234:reg_data<=24'h370952;
 				 235:reg_data<=24'h370c03; 
-				 236:reg_data<=24'h3a0217;// 60Hz max exposure, night mode 5fps
-				 237:reg_data<=24'h3a0310;// 60Hz max exposure // banding filters are calculated automatically in camera driver
+				 236:reg_data<=24'h3a0209;// 60Hz max exposure, night mode 5fps
+				 237:reg_data<=24'h3a0363;// 60Hz max exposure // banding filters are calculated automatically in camera driver
+				 238:reg_data<=24'h503d80;
+				 239:reg_data<=24'h474100; 
+				 
+				 
+				 
 				 //reg_data<=24'h3a0801;// B50 step
 				 //reg_data<=24'h3a0927;// B50 step
 				 //reg_data<=24'h3a0a00;// B60 step
@@ -361,8 +366,7 @@ module camera_cfg
 				 248:reg_data<=24'h382402; // DVP CLK divider 
 				 249:reg_data<=24'h5001a3; // SDE on, scale on, UV average off, color matrix on, AWB on
 				 250:reg_data<=24'h350300; // AEC/AGC on 
-				 251:reg_data<=24'h503d80;
-				 252:reg_data<=24'h474100; 
+				 
 				
 				 //strobe flash and frame exposure 	 
 				 304:reg_data<=24'h3b0083;              //STROBE CTRL: strobe request ON, Strobe mode: LED3 
