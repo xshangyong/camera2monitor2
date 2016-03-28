@@ -170,7 +170,7 @@ module vga_module
 	wire		cfg_done;
 	reg			cmos_href_d1,cmos_href_d2;
 	reg			cmos_vsyn_d1,cmos_vsyn_d2;
-	wire		href_neg,href_pos,vsyn_pos;
+	wire		href_neg,href_pos,vsyn_pos,vsyn_neg2;
 	wire[15:0]	data_16b;
 	wire		data_16b_en;
 	reg			bank_switch = 0;
@@ -238,9 +238,10 @@ module vga_module
 	assign href_pos = ~cmos_href_d2 & cmos_href_d1;
 	assign href_neg = cmos_href_d2 & ~cmos_href_d1;	
 	assign vsyn_pos = ~cmos_vsyn_d2 & cmos_vsyn_d1;
-
-			wire vsyn3;
-		assign vsyn3 = (cnt_vsyn==3 && cfg_done==1) ? 1 : 0;
+	assign vsyn_neg2 = cmos_vsyn_d2 & ~cmos_vsyn_d1;
+	
+	wire cam_en;
+	assign cam_en = (cnt_vsyn == 20) ? 1 : 0;
 
 	always@(posedge clk_133M)begin
 		
@@ -292,7 +293,7 @@ module vga_module
 		.cmos_data	(cmos_data),
 		.cmos_pclk	(cmos_pclk),
 		.cmos_href	(cmos_href),
-		.cfg_done	(cfg_done),
+		.cfg_done	(cam_en),
 		.data_16b	(data_16b),
 		.data_16b_en(data_16b_en)
 	);
@@ -301,7 +302,7 @@ module vga_module
 		.cmos_pclk		(cmos_pclk),
 		.clk_133M_i		(clk_133M),
 		.rst_133i		(rst_133),
-		.vsyn_pos		(vsyn_pos),
+		.vsyn_pos		(vsyn_neg2),
 		.data_16b		(data_16b),
 		.data_16b_en	(data_16b_en),
 		.fifo_used_o	(fifo_used),
@@ -380,7 +381,27 @@ module vga_module
 		.work_st		(work_st),
 		.cnt_work		(cnt_work)
 	);
-
+	
+	
+	wire  rd_fifo_valid;
+	assign rd_fifo_valid = rd_fifo_used <= 512 ? 1 : 0;
+	reg	rdfifo_valid_d1, rdfifo_valid_d2;
+	reg	vga_vsyn_d1, vga_vsyn_d2;
+	always@(posedge clk_133M or negedge rst_133)begin
+		if(!rst_133) begin
+			rdfifo_valid_d1 <= 0;
+			rdfifo_valid_d2 <= 0;
+			vga_vsyn_d1   	<= 0;
+			vga_vsyn_d2  	<= 0;
+		end
+		else begin
+			rdfifo_valid_d1 <= rd_fifo_valid;
+			rdfifo_valid_d2 <= rdfifo_valid_d1;
+			vga_vsyn_d1 <= VSYNC_Sig_d1;
+			vga_vsyn_d2 <= vga_vsyn_d1;
+		end	
+	end
+	
 
 
 	always@(posedge clk_133M or negedge rst_133)begin
@@ -390,7 +411,7 @@ module vga_module
 			st_rdsdram   <= 0;
 		end
 		else begin
-			if(VSYNC_Sig_d1 == 0) begin
+			if(vga_vsyn_d2 == 0) begin
 				st_rdsdram <= 0;
 				rd_sdram_add <= 0;
 				rd_sdram_req <= 0;
@@ -398,7 +419,7 @@ module vga_module
 			else begin
 				case(rd_sdram_req)
 					0 : begin
-						if( rd_fifo_used <= 512 && rd_sdram_add[21:9] < 750) begin
+						if( rdfifo_valid_d2 == 1 && rd_sdram_add[21:9] < 750) begin
 							st_rdsdram <= 1;
 							rd_sdram_req <= 1;
 //							rd_sdram_add[22] <= ~bank_switch;
@@ -427,6 +448,36 @@ module vga_module
 
 	
 
+	// sync cnt_vsyn and fifo_used
+	// fifo_used >= 512 && cnt_vsyn == 20
+	wire  fifo_used_valid, cnt_vsyn_valid,cnt_vsyn_min;
+	assign fifo_used_valid = fifo_used >= 512 ? 1 : 0;
+	assign cnt_vsyn_valid = cnt_vsyn == 20 ? 1 : 0;
+	assign cnt_vsyn_min = cnt_vsyn < 20 ? 1 : 0;
+	
+	reg	fifo_valid_d1, fifo_valid_d2;
+	reg	vsyn_valid_d1, vsyn_valid_d2;
+	reg	cnt_vsyn_min_d1, cnt_vsyn_min_d2;
+	
+	always@(posedge clk_133M or negedge rst_133)begin
+		if(!rst_133) begin
+			fifo_valid_d1   <= 0;
+			fifo_valid_d2   <= 0;
+			vsyn_valid_d1   <= 0;
+			vsyn_valid_d2   <= 0;
+			cnt_vsyn_min_d1 <= 0;
+			cnt_vsyn_min_d2 <= 0;
+			
+		end
+		else begin
+			fifo_valid_d1 <= fifo_used_valid;
+			fifo_valid_d2 <= fifo_valid_d1;
+			vsyn_valid_d1 <= cnt_vsyn_valid;
+			vsyn_valid_d2 <= vsyn_valid_d1;
+			cnt_vsyn_min_d1 <= cnt_vsyn_min;
+			cnt_vsyn_min_d2 <= cnt_vsyn_min_d1;
+		end
+	end
 	
 	always@(posedge clk_133M or negedge rst_133)begin
 		if(!rst_133) begin
@@ -435,7 +486,7 @@ module vga_module
 			st_wrsdram     <= 0;
 		end
 		else begin
-			if(cnt_vsyn < 20) begin
+			if(cnt_vsyn_min_d2) begin
 				st_wrsdram <= 0;
 				wr_sdram_add <= 0;
 				wr_sdram_req <= 0;
@@ -444,7 +495,7 @@ module vga_module
 			begin
 				case(wr_sdram_req)
 					0 : begin
-						if(fifo_used >= 512 && cnt_vsyn == 20 ) begin
+						if(fifo_valid_d2 && vsyn_valid_d2) begin
 							st_wrsdram <= 1;
 							wr_sdram_req <= 1;
 //							wr_sdram_add[22] <= bank_switch;
@@ -496,7 +547,7 @@ module vga_module
 	(
 		.clk_i(CLK),
 		.rst_i(rst_100),
-		.num_i(digi),
+		.num_i({7'h0,wr_sdram_add[21:9]}),
 		.row_o(row_o),
 		.column_o(column_o)
 	);
@@ -506,7 +557,7 @@ module vga_module
 		  VSYNC_Sig<= VSYNC_Sig_d1;
 		  HSYNC_Sig<= HSYNC_Sig_d1;
 	 end
-assign  fifo_clear  = ~VSYNC_Sig_d1;   
+assign  fifo_clear  = VSYNC_Sig_d1 & ~VSYNC_Sig;   
 assign  vsyn_neg    = VSYNC_Sig_d1 & ~VSYNC_Sig;  //negadge
 assign  vga_rdfifo 	= is_pic & Ready_Sig;
 	 

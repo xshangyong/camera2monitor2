@@ -378,11 +378,11 @@ module sdram_ctrl
 					end
 					W_TRCD: begin
 						if(cnt_work >= 2) begin
-							if(sys_state == 1) begin
-								nxt_wst = W_READ;
-							end
-							else if(sys_state == 2) begin
+							if(sys_state == 2) begin
 								nxt_wst = W_WRITE;
+							end
+							else if(sys_state == 1) begin
+								nxt_wst = W_READ;
 							end
 							else begin
 								nxt_wst = W_IDLE;

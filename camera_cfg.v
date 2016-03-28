@@ -342,10 +342,11 @@ module camera_cfg
 				 235:reg_data<=24'h370c03; 
 				 236:reg_data<=24'h3a0209;// 60Hz max exposure, night mode 5fps
 				 237:reg_data<=24'h3a0363;// 60Hz max exposure // banding filters are calculated automatically in camera driver
-				 238:reg_data<=24'h503d80;
+				 238:reg_data<=24'h503d80; // color bar
 				 239:reg_data<=24'h474100; 
-				 
-				 
+				// 238:reg_data<=24'h503d82; 	// color squrae
+				// 239:reg_data<=24'h474100; 
+
 				 
 				 //reg_data<=24'h3a0801;// B50 step
 				 //reg_data<=24'h3a0927;// B50 step
