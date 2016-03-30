@@ -162,6 +162,7 @@ module vga_module
 	reg[31:0]	cnt_ref_r = 0;
 	reg[31:0]	cnt_ref = 0;
 	reg[31:0]	cnt_pix = 0;
+	reg[31:0]	cnt_pix2 = 0;
 	reg[31:0]	cnt_pix_r = 0;
 	reg[31:0]	cnt_vsyn = 0;
 	reg			pclk_valid = 0;
@@ -174,8 +175,7 @@ module vga_module
 	wire[15:0]	data_16b;
 	wire		data_16b_en;
 	reg			bank_switch = 0;
-	
-	
+	wire		vga_vsyn_pos;
 	assign led_o1 =  st_wrsdram; 
 	assign led_o2 =  st_rdsdram; 
 	assign led_o3 =  wr_sdram_req; 
@@ -215,7 +215,13 @@ module vga_module
 		
 		
 	end
-	
+*/	
+
+	always@(posedge cmos_pclk)begin
+		if(pclk_valid) begin
+			cnt_pix2 <= cnt_pix2 + 1;
+		end
+	end
 	always@(posedge clk_100M) begin
 		if(!cfg_done) begin
 			cnt_100 <= 0;
@@ -234,7 +240,7 @@ module vga_module
 	end
 	
 //..//..//..//..//   test code end
-*/
+
 	assign href_pos = ~cmos_href_d2 & cmos_href_d1;
 	assign href_neg = cmos_href_d2 & ~cmos_href_d1;	
 	assign vsyn_pos = ~cmos_vsyn_d2 & cmos_vsyn_d1;
@@ -247,7 +253,6 @@ module vga_module
 		
 	end
 
-	
 	always@(posedge cmos_pclk)begin
 		if(!RSTn) begin
 			cnt_vsyn  <= 0;
@@ -286,6 +291,8 @@ module vga_module
 		else if(cmos_href == 1) begin
 			cnt_pix <= cnt_pix + 1;
 		end
+		
+		
 	end
 	
 	
@@ -540,6 +547,7 @@ module vga_module
 	);	
 	
 	wire[19:0] digi;
+	reg[19:0]	cnt_vga_vsyn_r=0;
 //	assign digi =  cnt_ref_r[9:0]*1000 + cnt_pix_r[11:2] ;
 	assign digi =  cnt_ref_r[9:0]*1000 + wr_sdram_add[18:9] ;
 	
@@ -557,21 +565,27 @@ module vga_module
 		  VSYNC_Sig<= VSYNC_Sig_d1;
 		  HSYNC_Sig<= HSYNC_Sig_d1;
 	 end
-assign  fifo_clear  = VSYNC_Sig_d1 & ~VSYNC_Sig;   
-assign  vsyn_neg    = VSYNC_Sig_d1 & ~VSYNC_Sig;  //negadge
-assign  vga_rdfifo 	= is_pic & Ready_Sig;
-	 
-	 
-	 
-	reg rst_vgasyn,rst_vgasyn1,rst_vgasyn2;
-	
-
-	always @ ( posedge clk_100M) begin
-		rst_vgasyn1 <= ~vsyn_pos;
-		rst_vgasyn2 <= rst_vgasyn1;
+	assign  fifo_clear  = VSYNC_Sig_d1 & ~VSYNC_Sig;   
+	assign  vga_vsyn_pos    = VSYNC_Sig_d1 & ~VSYNC_Sig;  //negadge
+	assign  vga_rdfifo 	= is_pic & Ready_Sig;
+		
+	reg	cmos_vsyn_100d1,cmos_vsyn_100d2;		
+	reg	cnt_vsyn_100valid_100d1,cnt_vsyn_100valid_100d2;
+	wire cmos_vsyn_100pos, cnt_vsyn_100valid,coms_vsyn_100pos;
+	always@(posedge clk_100M)begin
+		cmos_vsyn_100d1 <= cmos_vsyn;
+		cmos_vsyn_100d2 <= cmos_vsyn_100d1;
+		
+		cnt_vsyn_100valid_100d1 <= cnt_vsyn_100valid;
+		cnt_vsyn_100valid_100d2 <= cnt_vsyn_100valid_100d1;
+		
 	end
-	
+	assign cmos_vsyn_100pos = 	cmos_vsyn_100d1 & ~cmos_vsyn_100d2;
+	assign cnt_vsyn_100valid = cnt_vsyn == 1 ? 1 : 0;
+	assign coms_vsyn_100pos = cnt_vsyn_100valid_100d1 & ~cnt_vsyn_100valid_100d2;
+	//wire	rst_tmp =  coms_vsyn_100pos & ~cnt_vsyn_100valid;
 	wire	rst_tmp = wr_sdram_add[21:9] >= 750 ? 1 : 0;
+
 	sync_module inst_sync
 	(
 		.CLK( clk_100M ),
@@ -593,7 +607,7 @@ assign  vga_rdfifo 	= is_pic & Ready_Sig;
 		  .Column_Addr_Sig( Column_Addr_Sig ), // input - from inst_sync
 		  .Row_Addr_Sig( Row_Addr_Sig ),       // input - from inst_sync
 		  .Red_Sig( Red_Sig[4:0] ),      // output - to top
-		  .Green_Sig( Green_Sig[5:0] ),  // output - to top
+		  .Green_Sig( Green_Sig[5:0] ),  // output - to top+
 		  .Blue_Sig( Blue_Sig[4:0] ),    // output - to top
 		  .ps2_data_i( ),
 		  .display_data(data_vga[15:0]),
