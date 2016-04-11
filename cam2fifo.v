@@ -3,7 +3,7 @@ module cam2fifo
 	input 			cmos_pclk		,  	
 	input			clk_133M_i		,  
 	input			rst_133i		,  
-	input			vsyn_pos		,  
+	input			clear_wrsdram_fifo		,  
 	input[15:0]		data_16b		,  
 	input			data_16b_en	    ,
 	output[10:0]	fifo_used_o	    ,
@@ -42,7 +42,7 @@ module cam2fifo
 	
 	desk_fifo inst_dfifo
 	(	         
-		.aclr	(vsyn_pos),  // need clear
+		.aclr	(clear_wrsdram_fifo),  // need clear
 		.data	(data_16b[15:0]),
 		.rdclk	(clk_133M_i),
 		.rdreq	(rd_fifo),
