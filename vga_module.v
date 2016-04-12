@@ -253,9 +253,7 @@ module vga_module
 	wire cam_en;
 	assign cam_en = (cnt_vsyn == 20) ? 1 : 0;
 
-	always@(posedge clk_133M)begin
-		
-	end
+
 
 	always@(posedge cmos_pclk)begin
 		if(!RSTn) begin
@@ -302,7 +300,7 @@ module vga_module
 		.cmos_data	(cmos_data),
 		.cmos_pclk	(cmos_pclk),
 		.cmos_href	(cmos_href),
-		.cfg_done	(cam_en),
+		.cfg_done	(1),
 		.data_16b	(data_16b),
 		.data_16b_en(data_16b_en)
 	);
@@ -503,6 +501,7 @@ module vga_module
 	end
 	//	write SDRAM
 	reg	vsyn_neg_d1,vsyn_neg_d2;
+	reg[21:9]	test_wrsdram_addr;
 	always@(posedge clk_133M or negedge rst_133)begin
 		if(!rst_133) begin
 			vsyn_neg_d1 <= 0;
@@ -526,14 +525,14 @@ module vga_module
 				wr_sdram_add[21:9] 	<= 0;
 				wr_sdram_add[23:22]	<= cam_bank;
 				wr_sdram_req 		<= 0;
-				clear_wrsdram_fifo	<= 1;			
+				clear_wrsdram_fifo	<= 1;
+				test_wrsdram_addr[21:9]	<= wr_sdram_add[21:9];
 			end
-			else 
-			begin
+			else begin
 				clear_wrsdram_fifo <= 0;
 				case(wr_sdram_req)
 					0 : begin
-						if(fifo_valid_d2 && vsyn_valid_d2) begin
+						if(fifo_valid_d2) begin
 							st_wrsdram <= 1;
 							wr_sdram_req <= 1;
 						end
@@ -585,7 +584,7 @@ module vga_module
 	(
 		.clk_i(CLK),
 		.rst_i(rst_100),
-		.num_i({7'h0,wr_sdram_add[21:9]}),
+		.num_i({7'h0,test_wrsdram_addr[21:9]}),
 		.row_o(row_o),
 		.column_o(column_o)
 	);

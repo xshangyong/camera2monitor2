@@ -78,10 +78,10 @@ module sdram_ctrl
 	reg[4:0]	nxt_wst = W_IDLE;
 	reg[9:0]	ref_cnt = 0;
 	reg			ref_req = 0;
+	reg			wr_rd_switch;
 	wire		ref_ack;
 	
-	assign ref_ack = (work_st == W_REF);		// SDRAM自刷新应答信号
-
+	assign ref_ack = (work_st == W_REF);		// SDRAM自刷新应答信�
 //	auto refresh counter , refresh req and ack	
 	always @(posedge clk or negedge rst_n) begin
 		if(!rst_n) begin
@@ -189,7 +189,15 @@ module sdram_ctrl
 					end
 					W_ACTIVE : begin
 						work_cnt_rst = 0;
-						if(wr_sdram_req == 1 )begin
+						if(wr_sdram_req == 1 && rd_sdram_req == 1) begin
+							if(wr_rd_switch == 1) begin
+								sys_state = 1;
+							end
+							else if(wr_rd_switch == 0) begin								
+								sys_state = 2;
+							end
+						end
+						else if(wr_sdram_req == 1)begin
 							sys_state = 2;
 						end
 						else if(rd_sdram_req == 1 )begin
@@ -246,7 +254,14 @@ module sdram_ctrl
 			end
 		endcase
 	end
-	
+	always @(posedge clk) begin
+		if(rd_sdram_ack) begin
+			wr_rd_switch <= 0;
+		end
+		else if(wr_sdram_ack) begin
+			wr_rd_switch <= 1;
+		end
+	end
 	always @(posedge clk or negedge rst_n) begin
 		if(!rst_n) begin
 			init_st <= I_200us;
