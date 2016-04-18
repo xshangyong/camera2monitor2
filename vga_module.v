@@ -200,7 +200,6 @@ module vga_module
 	assign href_neg = cmos_href_d2 & ~cmos_href_d1;	
 	assign vsyn_pos = ~cmos_vsyn_d2 & cmos_vsyn_d1;
 	
-	
 	always@(posedge cmos_pclk)begin
 		if(href_neg) begin
 			cnt_pix <= 0;
@@ -216,16 +215,18 @@ module vga_module
 		else if(href_neg) begin
 			cnt_ref <= cnt_ref + 1;
 		end
-		
-		
 	end
+	
 */	
+	
 
 	always@(posedge cmos_pclk)begin
 		if(pclk_valid) begin
 			cnt_pix2 <= cnt_pix2 + 1;
 		end
 	end
+	
+	
 	always@(posedge clk_100M) begin
 		if(!cfg_done) begin
 			cnt_100 <= 0;
@@ -327,18 +328,18 @@ module vga_module
 		.cfg_done	(cfg_done)
 	); 
 	
-	reg_config	reg_config_inst(
-		.clk_25M                 (clk_cfg),
-		.camera_rstn             (rst_100),
-		.initial_en              (),		
-		.i2c_sclk                (),
-		.i2c_sdat                (),
-		.reg_conf_done           (),
-		.strobe_flash            (),
-		.reg_index               (),
-		.clock_20k               (),
-		.key1                    (1'b1)
-	);
+//	reg_config	reg_config_inst(
+//		.clk_25M                 (clk_cfg),
+//		.camera_rstn             (rst_100),
+//		.initial_en              (),		
+//		.i2c_sclk                (),
+//		.i2c_sdat                (),
+//		.reg_conf_done           (),
+//		.strobe_flash            (),
+//		.reg_index               (),
+//		.clock_20k               (),
+//		.key1                    (1'b1)
+//	);
 	
 	
 	clk_100m inst_100m(
@@ -393,8 +394,9 @@ module vga_module
 	(
 		.clk			(clk_133M		),  // use 133MHz clk
 		.rst_133		(rst_133		),
-		.vga_rise		(vga_vsyn_neg	),	
-		.cam_rise		(vsyn_pos		),
+		.button			(RSTn			),
+		.vga_rise		(VSYNC_Sig_d1	),	
+		.cam_rise		(cmos_vsyn		),
 		.vga_bank		(vga_bank		),
 		.cam_bank		(cam_bank		),
 		.bk3_state		(bk3_state		)
@@ -500,16 +502,18 @@ module vga_module
 		end
 	end
 	//	write SDRAM
-	reg	vsyn_neg_d1,vsyn_neg_d2;
+	reg	cmos_v133_d1,cmos_v133_d2;
 	reg[21:9]	test_wrsdram_addr;
+	wire	cmos_v133_neg;
+	assign	cmos_v133_neg =  ~cmos_v133_d1 & cmos_v133_d2;
 	always@(posedge clk_133M or negedge rst_133)begin
 		if(!rst_133) begin
-			vsyn_neg_d1 <= 0;
-			vsyn_neg_d2 <= 0;
+			cmos_v133_d1 <= 0;
+			cmos_v133_d2 <= 0;
 		end
 		else begin
-			vsyn_neg_d1 <= vsyn_neg2;
-			vsyn_neg_d2 <= vsyn_neg_d1;		
+			cmos_v133_d1 <= cmos_vsyn;
+			cmos_v133_d2 <= cmos_v133_d1;		
 		end
 	end
 	always@(posedge clk_133M or negedge rst_133)begin
@@ -520,13 +524,15 @@ module vga_module
 			clear_wrsdram_fifo <= 0;
 		end
 		else begin
-			if(vsyn_neg_d2) begin
+			if(cmos_v133_neg) begin
 				st_wrsdram 			<= 0;
 				wr_sdram_add[21:9] 	<= 0;
 				wr_sdram_add[23:22]	<= cam_bank;
 				wr_sdram_req 		<= 0;
 				clear_wrsdram_fifo	<= 1;
-				test_wrsdram_addr[21:9]	<= wr_sdram_add[21:9];
+				if(wr_sdram_add[21:9] != 0) begin
+					test_wrsdram_addr[21:9]	<= wr_sdram_add[21:9];
+				end
 			end
 			else begin
 				clear_wrsdram_fifo <= 0;
@@ -584,7 +590,7 @@ module vga_module
 	(
 		.clk_i(CLK),
 		.rst_i(rst_100),
-		.num_i({7'h0,test_wrsdram_addr[21:9]}),
+		.num_i(cnt_pix2[19:0]),
 		.row_o(row_o),
 		.column_o(column_o)
 	);

@@ -78,7 +78,7 @@ module sdram_ctrl
 	reg[4:0]	nxt_wst = W_IDLE;
 	reg[9:0]	ref_cnt = 0;
 	reg			ref_req = 0;
-	reg			wr_rd_switch;
+	reg			wr_rd_switch = 0;
 	wire		ref_ack;
 	
 	assign ref_ack = (work_st == W_REF);		// SDRAM自刷新应答信�
@@ -202,9 +202,6 @@ module sdram_ctrl
 						end
 						else if(rd_sdram_req == 1 )begin
 							sys_state = 1;
-						end
-						else begin
-							sys_state = 0;
 						end
 					end
 					W_RC : begin

@@ -60,22 +60,22 @@ module test_top();
 	end
 	
 	always @(posedge cmos_pclk) begin
-		if(cnt == 5596992) begin
-			cnt <= cnt;
+		if(cnt == 500000) begin
+			cnt <= 0;
 		end
 		else begin
 			cnt <= cnt + 1;
 		end
 		
-		if( cnt >= 0 && cnt <= 2600) begin  // after  sdram initialized
+		if( cnt >= 0 && cnt <= 1000) begin  // after  sdram initialized
 			cmos_vsyn <= 1;
 		end
 		else begin
 			cmos_vsyn <= 0;
 		end
 		
-		if(cmos_vsyn == 0 && cnt_row < ROW) begin
-			if(cnt_pix == 2148 ) begin
+		if(cmos_vsyn == 0 && cnt_row < 480) begin
+			if(cnt_pix == 900 ) begin
 				cnt_row <= cnt_row + 1;
 				cnt_pix <= 0;
 				cmos_href <= 0;
