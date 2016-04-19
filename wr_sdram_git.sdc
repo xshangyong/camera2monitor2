@@ -23,10 +23,8 @@
 
 # Clock constraints
 
-create_clock -name "clk_in" -period 20.000ns [get_ports {CLK}]
+create_clock -name "clk_in" -period 20ns [get_ports {CLK}]
 create_clock -name "pclk" -period 21.920ns [get_ports {cmos_pclk}]
-create_clock -name "clk_100" -period 25.000ns [get_ports {inst_133m|altpll_component|auto_generated|pll1|clk[0]}]
-create_clock -name "clk_133" -period 12.500ns [get_ports {inst_133m|altpll_component|auto_generated|pll1|clk[1]}]
 
 
 # Automatically constrain PLL and other generated clocks

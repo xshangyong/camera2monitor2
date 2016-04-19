@@ -39,7 +39,7 @@ set_time_format -unit ns -decimal_places 3
 #**************************************************************
 
 create_clock -name {CLK} -period 20.000 -waveform { 0.000 10.000 } [get_ports {CLK}]
-create_clock -name {cmos_pclk} -period 1.000 -waveform { 0.000 0.500 } [get_ports {cmos_pclk}]
+create_clock -name {pclk} -period 21.92 -waveform { 0.000 10.96 } [get_ports {cmos_pclk}]
 create_clock -name {camera_cfg:inst_camcfg|clock_20k} -period 1.000 -waveform { 0.000 0.500 } [get_registers {camera_cfg:inst_camcfg|clock_20k}]
 create_clock -name {sdram_top:inst_sdtop|sdram_ctrl:inst_sdctrl|init_st[0]} -period 1.000 -waveform { 0.000 0.500 } [get_registers {sdram_top:inst_sdtop|sdram_ctrl:inst_sdctrl|init_st[0]}]
 create_clock -name {sdram_top:inst_sdtop|sdram_ctrl:inst_sdctrl|init_st[1]} -period 1.000 -waveform { 0.000 0.500 } [get_registers {sdram_top:inst_sdtop|sdram_ctrl:inst_sdctrl|init_st[1]}]
@@ -49,8 +49,8 @@ create_clock -name {sdram_top:inst_sdtop|sdram_ctrl:inst_sdctrl|init_st[1]} -per
 # Create Generated Clock
 #**************************************************************
 
-create_generated_clock -name {inst_133m|altpll_component|auto_generated|pll1|clk[0]} -source [get_pins {inst_133m|altpll_component|auto_generated|pll1|inclk[0]}] -duty_cycle 50.000 -multiply_by 2 -divide_by 5 -master_clock {inst_100m|altpll_component|auto_generated|pll1|clk[0]} [get_pins {inst_133m|altpll_component|auto_generated|pll1|clk[0]}] 
-create_generated_clock -name {inst_133m|altpll_component|auto_generated|pll1|clk[1]} -source [get_pins {inst_133m|altpll_component|auto_generated|pll1|inclk[0]}] -duty_cycle 50.000 -multiply_by 1 -master_clock {inst_100m|altpll_component|auto_generated|pll1|clk[0]} [get_pins {inst_133m|altpll_component|auto_generated|pll1|clk[1]}] 
+create_generated_clock -name {clk100} -source [get_pins {inst_133m|altpll_component|auto_generated|pll1|inclk[0]}] -duty_cycle 50.000 -multiply_by 2 -divide_by 5 -master_clock {inst_100m|altpll_component|auto_generated|pll1|clk[0]} [get_pins {inst_133m|altpll_component|auto_generated|pll1|clk[0]}] 
+create_generated_clock -name {clk133} -source [get_pins {inst_133m|altpll_component|auto_generated|pll1|inclk[0]}] -duty_cycle 50.000 -multiply_by 1 -master_clock {inst_100m|altpll_component|auto_generated|pll1|clk[0]} [get_pins {inst_133m|altpll_component|auto_generated|pll1|clk[1]}] 
 create_generated_clock -name {inst_100m|altpll_component|auto_generated|pll1|clk[0]} -source [get_pins {inst_100m|altpll_component|auto_generated|pll1|inclk[0]}] -duty_cycle 50.000 -multiply_by 2 -master_clock {CLK} [get_pins {inst_100m|altpll_component|auto_generated|pll1|clk[0]}] 
 create_generated_clock -name {inst_100m|altpll_component|auto_generated|pll1|clk[1]} -source [get_pins {inst_100m|altpll_component|auto_generated|pll1|inclk[0]}] -duty_cycle 50.000 -multiply_by 12 -divide_by 25 -master_clock {CLK} [get_pins {inst_100m|altpll_component|auto_generated|pll1|clk[1]}] 
 create_generated_clock -name {inst_100m|altpll_component|auto_generated|pll1|clk[2]} -source [get_pins {inst_100m|altpll_component|auto_generated|pll1|inclk[0]}] -duty_cycle 50.000 -multiply_by 1 -divide_by 2 -master_clock {CLK} [get_pins {inst_100m|altpll_component|auto_generated|pll1|clk[2]}] 
@@ -211,7 +211,7 @@ set_clock_uncertainty -fall_from [get_clocks {sdram_top:inst_sdtop|sdram_ctrl:in
 #**************************************************************
 # Set Input Delay
 #**************************************************************
-
+set_input_delay -clock { pclk } 0 [get_ports {cmos_data[0] cmos_data[1] cmos_data[2] cmos_data[3] cmos_data[4] cmos_data[5] cmos_data[6] cmos_data[7]}]
 
 
 #**************************************************************

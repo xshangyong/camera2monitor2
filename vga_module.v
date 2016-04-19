@@ -301,7 +301,7 @@ module vga_module
 		.cmos_data	(cmos_data),
 		.cmos_pclk	(cmos_pclk),
 		.cmos_href	(cmos_href),
-		.cfg_done	(1),
+		.cfg_done	(cfg_done),
 		.data_16b	(data_16b),
 		.data_16b_en(data_16b_en)
 	);
@@ -462,13 +462,6 @@ module vga_module
 	end
 	
 
-	// write sdram, wr_sdram_req high means write begins,ack high means write finished 
-	// start when fifo_used >= 512
-	always@(posedge cmos_pclk)begin
-		if(vsyn_pos == 1) begin
-			bank_switch <= ~bank_switch;
-		end
-	end
 
 	
 
@@ -530,9 +523,7 @@ module vga_module
 				wr_sdram_add[23:22]	<= cam_bank;
 				wr_sdram_req 		<= 0;
 				clear_wrsdram_fifo	<= 1;
-				if(wr_sdram_add[21:9] != 0) begin
-					test_wrsdram_addr[21:9]	<= wr_sdram_add[21:9];
-				end
+				test_wrsdram_addr[21:9]	<= wr_sdram_add[21:9];
 			end
 			else begin
 				clear_wrsdram_fifo <= 0;
@@ -590,7 +581,7 @@ module vga_module
 	(
 		.clk_i(CLK),
 		.rst_i(rst_100),
-		.num_i(cnt_pix2[19:0]),
+		.num_i(),	//{7'h0,wr_sdram_add[21:9]}
 		.row_o(row_o),
 		.column_o(column_o)
 	);

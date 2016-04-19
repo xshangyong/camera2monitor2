@@ -11,4 +11,25 @@ report_timing -to [get_ports {sdram_clk}] -setup -npaths 1 -detail full_path -pa
 
 report_timing -to [get_ports {sdram_clk}] -hold -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_clk_outputdelay.txt" -append
 
+report_timing -to [get_ports {sdram_addr[0] sdram_addr[1] sdram_addr[2] sdram_addr[3] sdram_addr[4] sdram_addr[5] sdram_addr[6] sdram_addr[7] sdram_addr[8] sdram_addr[9] sdram_addr[10] sdram_addr[11] sdram_addr[12]}] -setup -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_add_outputdelay.txt"
+
+report_timing -to [get_ports {sdram_addr[0] sdram_addr[1] sdram_addr[2] sdram_addr[3] sdram_addr[4] sdram_addr[5] sdram_addr[6] sdram_addr[7] sdram_addr[8] sdram_addr[9] sdram_addr[10] sdram_addr[11] sdram_addr[12]}] -hold -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_add_outputdelay.txt" -append
+
+report_timing -to [get_ports {sdram_ncas}] -setup -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_cmd_outputdelay.txt"
+
+report_timing -to [get_ports {sdram_ncas}] -hold -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_cmd_outputdelay.txt" -append
+
+report_timing -to [get_ports {sdram_ncs}] -setup -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_cmd_outputdelay.txt" -append
+
+report_timing -to [get_ports {sdram_ncs}] -hold -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_cmd_outputdelay.txt" -append
+
+report_timing -to [get_ports {sdram_nras}] -setup -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_cmd_outputdelay.txt" -append
+
+report_timing -to [get_ports {sdram_nras}] -hold -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_cmd_outputdelay.txt" -append
+
+report_timing -to [get_ports {sdram_nwe}] -setup -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_cmd_outputdelay.txt" -append
+
+report_timing -to [get_ports {sdram_nwe}] -hold -npaths 1 -detail full_path -panel_name {Report Timing} -file "C:/FPGA/fpga_proj/camera2monitor2/STA/sdram_cmd_outputdelay.txt" -append
+
+
 

@@ -16,3 +16,4 @@ incremental_db/
 *.ppf
 *.log
 *.err
+*.ddb

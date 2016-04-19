@@ -56,7 +56,7 @@ module test_top();
 	end
 	
 	always begin
-		#5.95 cmos_pclk = ~cmos_pclk;
+		#5.48 cmos_pclk = ~cmos_pclk;
 	end
 	
 	always @(posedge cmos_pclk) begin
@@ -90,7 +90,9 @@ module test_top();
 					cmos_data <= $random() % 9'h100;
 				end
 			end
-			
+		end
+		else if(cmos_vsyn == 1) begin
+			cnt_row <= 0;
 		end
 	end
 	
