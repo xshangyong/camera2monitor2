@@ -295,11 +295,12 @@ module vga_module
 			cnt_pix <= cnt_pix + 1;
 		end
 	end
-	
+	wire pclk_not;
+	assign pclk_not = ~cmos_pclk;
 	
  	recv_cam inst_recv(
 		.cmos_data	(cmos_data),
-		.cmos_pclk	(cmos_pclk),
+		.cmos_pclk	(pclk_not),
 		.cmos_href	(cmos_href),
 		.cfg_done	(cfg_done),
 		.data_16b	(data_16b),
@@ -307,7 +308,7 @@ module vga_module
 	);
 	
 	cam2fifo inst_cam2fifo(
-		.cmos_pclk			(cmos_pclk),
+		.cmos_pclk			(pclk_not),
 		.clk_133M_i			(clk_133M),
 		.rst_133i			(rst_133),
 		.clear_wrsdram_fifo	(clear_wrsdram_fifo),

@@ -19,7 +19,7 @@
 ## PROGRAM "Quartus II"
 ## VERSION "Version 11.0 Build 208 07/03/2011 Service Pack 1 SJ Full Version"
 
-## DATE    "Tue Apr 19 21:50:52 2016"
+## DATE    "Tue Apr 19 22:19:08 2016"
 
 ##
 ## DEVICE  "EP4CE15F17C8"
@@ -81,6 +81,14 @@ set_clock_uncertainty -fall_from [get_clocks {inst_100m|altpll_component|auto_ge
 # Set Input Delay
 #**************************************************************
 
+set_input_delay -add_delay  -clock [get_clocks {pclk}]  0.000 [get_ports {cmos_data[0]}]
+set_input_delay -add_delay  -clock [get_clocks {pclk}]  0.000 [get_ports {cmos_data[1]}]
+set_input_delay -add_delay  -clock [get_clocks {pclk}]  0.000 [get_ports {cmos_data[2]}]
+set_input_delay -add_delay  -clock [get_clocks {pclk}]  0.000 [get_ports {cmos_data[3]}]
+set_input_delay -add_delay  -clock [get_clocks {pclk}]  0.000 [get_ports {cmos_data[4]}]
+set_input_delay -add_delay  -clock [get_clocks {pclk}]  0.000 [get_ports {cmos_data[5]}]
+set_input_delay -add_delay  -clock [get_clocks {pclk}]  0.000 [get_ports {cmos_data[6]}]
+set_input_delay -add_delay  -clock [get_clocks {pclk}]  0.000 [get_ports {cmos_data[7]}]
 
 
 #**************************************************************
