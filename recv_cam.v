@@ -14,6 +14,7 @@ module recv_cam
 	input			cmos_pclk;
 	input			cfg_done;
 	input			cmos_href;
+	input			cmos_vsyn;
 	output[15:0]	data_16b;
 	output			data_16b_en;	
 	
@@ -21,9 +22,9 @@ module recv_cam
 	reg			data_bit = 0;
 	reg[15:0]	data_16b_r = 0;
 	reg			data_16b_enr = 0;
-	reg			cmos_vsyn_d1;
-	reg			cmos_vsyn_d2;
-	reg[7:0]	cnt_vsyn;
+	reg			cmos_vsyn_d1=0;
+	reg			cmos_vsyn_d2=0;
+	reg[7:0]	cnt_vsyn=0;
 	reg			cmos_valid;
 	wire vsyn_pos;	
 	assign data_16b = data_16b_r;
@@ -60,14 +61,8 @@ module recv_cam
 		end
 	end 
 
-	wire vsyn_pos;
 	assign vsyn_pos = cmos_vsyn_d1 & ~cmos_vsyn_d2;
 	always@(posedge cmos_pclk)begin
-		if(!RSTn) begin
-			cnt_vsyn  <= 0;
-			cmos_vsyn_d1 <= 0;
-			cmos_vsyn_d2 <= 0;
-		end
 		cmos_vsyn_d1 <= cmos_vsyn;
 		cmos_vsyn_d2 <= cmos_vsyn_d1;
 		
