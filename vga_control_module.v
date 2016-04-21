@@ -27,18 +27,21 @@ module vga_control_module
 	
 	// is_pic read fifo ,data valid delay 1 clk cycle
 	reg	ispic_d1 = 0;			
+	reg	Ready_Sig_d1 = 0;			
 	always @(posedge CLK) begin
 		if(!RSTn) begin
-			ispic_d1 = 0;
+			ispic_d1 <= 0;
+			Ready_Sig_d1 <= 0;
 		end
 		else begin
 			ispic_d1 <= is_pic;
+			Ready_Sig_d1 <= Ready_Sig;
 		end
 	end
 	
-	assign Red_Sig[4:0]   = Ready_Sig && ispic_d1 ? display_data[15:11] : 0;
-	assign Green_Sig[5:0] = Ready_Sig && ispic_d1 ? display_data[10:5]  : 0;
-	assign Blue_Sig[4:0]  = Ready_Sig && ispic_d1 ? display_data[4:0]   : 0;
+	assign Red_Sig[4:0]   = Ready_Sig_d1 && ispic_d1 ? display_data[15:11] : 0;
+	assign Green_Sig[5:0] = Ready_Sig_d1 && ispic_d1 ? display_data[10:5]  : 0;
+	assign Blue_Sig[4:0]  = Ready_Sig_d1 && ispic_d1 ? display_data[4:0]   : 0;
 	 
 	 
 

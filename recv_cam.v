@@ -36,7 +36,7 @@ module recv_cam
 		
 	end
 	always@(posedge cmos_pclk)begin
-		if(done_d2 == 0 || cmos_vsyn == 1 || cmos_href == 0 || cmos_valid == 0) begin
+		if(done_d2 == 0 || cmos_vsyn == 1 || cmos_valid == 0) begin //
 			data_16b_r <= 0;
 			data_16b_enr <= 0;
 			data_bit <= 1'b0;
@@ -55,8 +55,8 @@ module recv_cam
 				end
 			end
 			else begin
-				data_16b_r <= 0;
-				data_16b_enr <= data_16b_enr;
+				data_16b_r <= data_16b_r;
+				data_16b_enr <= 0;
 			end
 		end
 	end 
