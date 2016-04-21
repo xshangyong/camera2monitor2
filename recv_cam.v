@@ -2,7 +2,8 @@ module recv_cam
 (
 	cmos_data,
 	cmos_pclk,
-	cmos_href,	
+	cmos_href,
+	cmos_vsyn,
 	cfg_done,
 	data_16b,
 	data_16b_en
@@ -20,7 +21,11 @@ module recv_cam
 	reg			data_bit = 0;
 	reg[15:0]	data_16b_r = 0;
 	reg			data_16b_enr = 0;
-	
+	reg			cmos_vsyn_d1;
+	reg			cmos_vsyn_d2;
+	reg[7:0]	cnt_vsyn;
+	reg			cmos_valid;
+	wire vsyn_pos;	
 	assign data_16b = data_16b_r;
 	assign data_16b_en = data_16b_enr;
 	
@@ -30,9 +35,10 @@ module recv_cam
 		
 	end
 	always@(posedge cmos_pclk)begin
-		if(done_d2 == 0) begin
+		if(done_d2 == 0 || cmos_vsyn == 1 || cmos_href == 0 || cmos_valid == 0) begin
 			data_16b_r <= 0;
 			data_16b_enr <= 0;
+			data_bit <= 1'b0;
 		end
 		else begin
 			if(cmos_href) begin
@@ -49,9 +55,35 @@ module recv_cam
 			end
 			else begin
 				data_16b_r <= 0;
-				data_16b_enr <= 0;
+				data_16b_enr <= data_16b_enr;
 			end
 		end
 	end 
 
+	wire vsyn_pos;
+	assign vsyn_pos = cmos_vsyn_d1 & ~cmos_vsyn_d2;
+	always@(posedge cmos_pclk)begin
+		if(!RSTn) begin
+			cnt_vsyn  <= 0;
+			cmos_vsyn_d1 <= 0;
+			cmos_vsyn_d2 <= 0;
+		end
+		cmos_vsyn_d1 <= cmos_vsyn;
+		cmos_vsyn_d2 <= cmos_vsyn_d1;
+		
+		if(vsyn_pos == 1) begin
+			if(cnt_vsyn == 30) begin
+				cnt_vsyn <= cnt_vsyn;
+				cmos_valid <= 1;
+			end
+			else begin
+				cnt_vsyn <= cnt_vsyn + 1;
+				cmos_valid <= 0; 
+			end
+		end
+
+	end
+
+	
+	
 endmodule

@@ -35,6 +35,7 @@ module bank_switch(
 			bk3_state <= 	2'b01;			
 		end
 		else begin
+			if(!button)begin
 				if(vga_posedge && cam_posedge) begin
 					vga_bank <= cam_bank;
 					cam_bank <=	vga_bank;
@@ -48,6 +49,7 @@ module bank_switch(
 					cam_bank <=  ~(vga_bank^cam_bank); 	//switch vga_bank to the 3rd bank, if it's full
 					bk3_state <= 2'b10;
 				end
+			end
 		end
 	end
 endmodule

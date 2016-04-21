@@ -252,7 +252,7 @@ module vga_module
 	assign vsyn_neg2 = cmos_vsyn_d2 & ~cmos_vsyn_d1;
 	
 	wire cam_en;
-	assign cam_en = (cnt_vsyn == 20) ? 1 : 0;
+	assign cam_en = (cnt_vsyn >= 20) ? 1 : 0;
 
 
 
@@ -295,20 +295,19 @@ module vga_module
 			cnt_pix <= cnt_pix + 1;
 		end
 	end
-	wire pclk_not;
-	assign pclk_not = ~cmos_pclk;
-	
+
  	recv_cam inst_recv(
 		.cmos_data	(cmos_data),
-		.cmos_pclk	(pclk_not),
+		.cmos_pclk	(cmos_pclk),
 		.cmos_href	(cmos_href),
+		.cmos_vsyn	(cmos_vsyn),
 		.cfg_done	(cfg_done),
 		.data_16b	(data_16b),
 		.data_16b_en(data_16b_en)
 	);
 	
 	cam2fifo inst_cam2fifo(
-		.cmos_pclk			(pclk_not),
+		.cmos_pclk			(cmos_pclk),
 		.clk_133M_i			(clk_133M),
 		.rst_133i			(rst_133),
 		.clear_wrsdram_fifo	(clear_wrsdram_fifo),
@@ -597,7 +596,7 @@ module vga_module
 	assign  vga_vsyn_neg    = ~VSYNC_Sig_d1 & VSYNC_Sig;  //negadge
 	assign  vga_rdfifo 	= is_pic & Ready_Sig;
 		
-	reg	cmos_vsyn_100d1,cmos_vsyn_100d2;		
+/* 	reg	cmos_vsyn_100d1,cmos_vsyn_100d2;		
 	reg	cnt_vsyn_100valid_100d1,cnt_vsyn_100valid_100d2;
 	wire cmos_vsyn_100pos, cnt_vsyn_100valid,coms_vsyn_100pos;
 	always@(posedge clk_100M)begin
@@ -613,7 +612,7 @@ module vga_module
 	assign coms_vsyn_100pos = cnt_vsyn_100valid_100d1 & ~cnt_vsyn_100valid_100d2;
 	//wire	rst_tmp =  coms_vsyn_100pos & ~cnt_vsyn_100valid;
 	wire	rst_tmp = wr_sdram_add[21:9] >= 750 ? 1 : 0;
-
+ */
 	sync_module inst_sync
 	(
 		.CLK( clk_100M ),
