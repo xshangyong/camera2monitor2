@@ -56,7 +56,7 @@ module fifo2vga
 	
 	desk_fifo inst_dfifo2
 	(	         
-		.aclr	(~rst_133i),
+		.aclr	(fifo_clear),
 		.data	(sdram_data[15:0]),
 		.rdclk	(clk_100M),
 		.rdreq	(vga_rdfifo),

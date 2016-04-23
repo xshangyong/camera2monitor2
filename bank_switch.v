@@ -26,7 +26,7 @@ module bank_switch(
 			cam_rise_2d <= cam_rise_1d;
 		end
 	end
-	assign vga_posedge = vga_rise_1d & ~vga_rise_2d;
+	assign vga_posedge = ~vga_rise_1d & vga_rise_2d;
 	assign cam_posedge = cam_rise_1d & ~cam_rise_2d;
 	always @ (posedge clk or negedge rst_133) begin
 		if(!rst_133) begin
@@ -35,7 +35,7 @@ module bank_switch(
 			bk3_state <= 	2'b01;			
 		end
 		else begin
-			if(!button)begin
+			if(1)begin
 				if(vga_posedge && cam_posedge) begin
 					vga_bank <= cam_bank;
 					cam_bank <=	vga_bank;

@@ -41,6 +41,8 @@ module test_top();
 	reg[31:0] cnt = 0;
 	reg[31:0] cnt_row = 0;
 	reg[31:0] cnt_pix = 0;
+	reg[15:0] cam_data = 0;
+	reg			cam_data_bit = 0;
 	initial begin
 		RSTn = 1;
 		CLK = 0;
@@ -48,6 +50,7 @@ module test_top();
 		cmos_href = 0;
 		cmos_vsyn = 0;
 		cmos_data = 0;
+		cam_data = 0;
 	end
 		
 		
@@ -60,7 +63,7 @@ module test_top();
 	end
 	
 	always @(posedge cmos_pclk) begin
-		if(cnt == 500000) begin
+		if(cnt == 1000000) begin
 			cnt <= 0;
 		end
 		else begin
@@ -75,7 +78,7 @@ module test_top();
 		end
 		
 		if(cmos_vsyn == 0 && cnt_row < 480) begin
-			if(cnt_pix == 900 ) begin
+			if(cnt_pix == 1700 ) begin
 				cnt_row <= cnt_row + 1;
 				cnt_pix <= 0;
 				cmos_href <= 0;
@@ -86,8 +89,20 @@ module test_top();
 					cmos_href <= 0;
 				end
 				else begin
+					cam_data_bit <= ~cam_data_bit;
 					cmos_href <= 1;
-					cmos_data <= $random() % 9'h100;
+					if(cam_data_bit == 0) begin
+						cmos_data <= cam_data[15:8];
+					end
+					else if(cam_data_bit == 1) begin
+						cmos_data <= cam_data[7:0];
+						if(cam_data[15:0] < 799) begin
+							cam_data[15:0] <= cam_data[15:0] + 1;
+						end
+						else begin
+							cam_data[15:0] <= 0;
+						end
+					end
 				end
 			end
 		end

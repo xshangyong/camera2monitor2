@@ -604,7 +604,6 @@ module sdram(Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
         // Read, Write, Column Latch
         if (Read_enable === 1'b1) begin
             // Check to see if bank is open (ACT)
-            $display ("Read_enable == 1");
 			if ((Ba == 2'b00 && Pc_b0 == 1'b1) || (Ba == 2'b01 && Pc_b1 == 1'b1) ||
                 (Ba == 2'b10 && Pc_b2 == 1'b1) || (Ba == 2'b11 && Pc_b3 == 1'b1)) begin
                 $display("%m : at time %t ERROR: Bank %d is not Activated for Read", $time,Ba);

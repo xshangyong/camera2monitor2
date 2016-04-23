@@ -537,7 +537,7 @@ module vga_module
 					1 : begin
 						if(wr_sdram_ack == 1) begin
 							// row addr:wr_sdram_add[21:9], column addr:wr_sdram_add[8:0]
-							wr_sdram_add[21:9] <= wr_sdram_add[21:9] + 1'b1;							
+							wr_sdram_add[21:9] <= wr_sdram_add[21:9] + 1'b1;
 							wr_sdram_req <= 0;
 							st_wrsdram <= 0;
 						end
@@ -626,8 +626,8 @@ module vga_module
 	
 	 /******************************************/
 	 
-	 vga_control_module inst_vga_control
-	 (
+	vga_control_module inst_vga_control
+	(
 	      .CLK( clk_100M ),
 		  .RSTn( rst_100 ), //rst_100
 		  .Ready_Sig( Ready_Sig ),             // input - from inst_sync
@@ -639,7 +639,7 @@ module vga_module
 		  .ps2_data_i( ),
 		  .display_data(data_vga[15:0]),
 		  .is_pic(is_pic)
-	 );
+	);
 
 
 endmodule

@@ -68,7 +68,7 @@ parameter V_SYN 		= 4;
 parameter V_BKPORCH 	= 23;
 parameter V_DATA 		= 600;
 parameter V_FTPORCH		= 1;
-parameter V_TOTAL    	= 625;
+parameter V_TOTAL    	= 628;
 	 
 	 
 	 

@@ -38,8 +38,8 @@ set_time_format -unit ns -decimal_places 3
 # Create Clock
 #**************************************************************
 
-create_clock -name {clk_in} -period 20.000 -waveform { 0.000 10.000 } [get_ports {CLK}]
-create_clock -name {pclk} -period 21.920 -waveform { 0.000 10.960 } [get_ports {cmos_pclk}]
+create_clock -name {clk_in} -period 10.000 -waveform { 0.000 5.000 } [get_ports {CLK}]
+create_clock -name {pclk} -period 11.000 -waveform { 0.000 5.000 } [get_ports {cmos_pclk}]
 
 
 #**************************************************************

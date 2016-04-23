@@ -7,7 +7,6 @@ module recv_cam
 	cfg_done,
 	data_16b,
 	data_16b_en
-	
 );
 
 	input[7:0] 		cmos_data;
@@ -25,7 +24,7 @@ module recv_cam
 	reg			cmos_vsyn_d1=0;
 	reg			cmos_vsyn_d2=0;
 	reg[7:0]	cnt_vsyn=0;
-	reg			cmos_valid;
+	reg			cmos_valid = 0 ;
 	wire vsyn_pos;	
 	assign data_16b = data_16b_r;
 	assign data_16b_en = data_16b_enr;
