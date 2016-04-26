@@ -7,23 +7,24 @@ set_location_assignment PIN_K2 -to led_o4
 set_location_assignment	PIN_L8	-to HSYNC_Sig
 set_location_assignment	PIN_K6	-to VSYNC_Sig
 
-set_location_assignment	PIN_L6	-to Red_Sig[0]
-set_location_assignment	PIN_P3	-to Red_Sig[1]
-set_location_assignment	PIN_N3	-to Red_Sig[2]
-set_location_assignment	PIN_K5	-to Red_Sig[3]
-set_location_assignment	PIN_L4	-to Red_Sig[4]
-set_location_assignment	PIN_L1	-to Green_Sig[0]
-set_location_assignment	PIN_L3	-to Green_Sig[1]
-set_location_assignment	PIN_T3	-to Green_Sig[2]
-set_location_assignment	PIN_R3	-to Green_Sig[3]
-set_location_assignment	PIN_T2	-to Green_Sig[4]
-set_location_assignment	PIN_R1	-to Green_Sig[5]
-set_location_assignment	PIN_P2	-to Blue_Sig[0]
-set_location_assignment	PIN_P1	-to Blue_Sig[1]
-set_location_assignment	PIN_N2	-to Blue_Sig[2]
-set_location_assignment	PIN_N1	-to Blue_Sig[3]
-set_location_assignment	PIN_L2	-to Blue_Sig[4]
+set_location_assignment	PIN_L6	-to Blue_Sig[0] 
+set_location_assignment	PIN_P3	-to Blue_Sig[1] 
+set_location_assignment	PIN_N3	-to Blue_Sig[2] 
+set_location_assignment	PIN_K5	-to Blue_Sig[3] 
+set_location_assignment	PIN_L4	-to Blue_Sig[4] 
 
+
+set_location_assignment	PIN_L3	-to Green_Sig[0]
+set_location_assignment	PIN_T3	-to Green_Sig[1]
+set_location_assignment	PIN_R3	-to Green_Sig[2]
+set_location_assignment	PIN_T2	-to Green_Sig[3]
+set_location_assignment	PIN_R1	-to Green_Sig[4]
+set_location_assignment	PIN_P2	-to Green_Sig[5]
+set_location_assignment	PIN_P1	-to Red_Sig[0]
+set_location_assignment	PIN_N2	-to Red_Sig[1]
+set_location_assignment	PIN_N1	-to Red_Sig[2]
+set_location_assignment	PIN_L2	-to Red_Sig[3]
+set_location_assignment	PIN_L1	-to Red_Sig[4]
 
 
 set_location_assignment	PIN_A10	-to sdram_data[0]

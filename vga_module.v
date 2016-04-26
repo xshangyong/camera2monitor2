@@ -114,6 +114,8 @@ module vga_module
 	reg[2:0]		st_wrsdram = 0;
 	reg[2:0]		st_rdsdram = 0;
 	reg[8:0]		wr_sdram_times = 0;
+	wire				clk_133M;
+	wire				clk_45M;
 	wire			fifo_clear;
 	wire[15:0]		data_vga;
 	wire[15:0]		cnt_work;
@@ -180,6 +182,11 @@ module vga_module
 	wire[1:0]	bk3_state;
 	reg			clear_rdsdram_fifo;
 	reg			clear_wrsdram_fifo;
+	wire[7:0]	virt_data;
+	wire		virt_href;
+	wire		virt_vsyn;
+	
+	
 	assign led_o1 =  st_wrsdram; 
 	assign led_o2 =  st_rdsdram; 
 	assign led_o3 =  wr_sdram_req; 
@@ -257,13 +264,12 @@ module vga_module
 
 
 	always@(posedge cmos_pclk)begin
-		if(!RSTn) begin
-			cnt_vsyn  <= 0;
-			cnt_ref   <= 0;
-			cnt_ref   <= 0;
-			cnt_pix   <= 0;
-			cnt_pix_r <= 0;
-		end
+//		if(!RSTn) begin
+//			cnt_vsyn  <= 0;
+//			cnt_ref   <= 0;
+//			cnt_pix   <= 0;
+//			cnt_pix_r <= 0;
+//		end
 		cmos_vsyn_d1 <= cmos_vsyn;
 		cmos_vsyn_d2 <= cmos_vsyn_d1;
 		cmos_href_d1 <= cmos_href;
@@ -287,15 +293,26 @@ module vga_module
 				cnt_ref <= cnt_ref + 1;
 			end
 		end
-		if(href_neg == 1) begin
+		
+		if(vsyn_pos == 1) begin
 			cnt_pix <= 0;
 			cnt_pix_r <= cnt_pix;
 		end
 		else if(cmos_href == 1) begin
 			cnt_pix <= cnt_pix + 1;
 		end
+
 	end
 
+	
+	generate_cam inst_cam(
+		.cmos_pclk	(clk_45M),
+		.cmos_data	(virt_data),
+		.cmos_href	(virt_href),
+		.cmos_vsyn	(virt_vsyn)
+	);
+
+	
  	recv_cam inst_recv(
 		.cmos_data	(cmos_data),
 		.cmos_pclk	(cmos_pclk),
@@ -303,7 +320,8 @@ module vga_module
 		.cmos_vsyn	(cmos_vsyn),
 		.cfg_done	(cfg_done),
 		.data_16b	(data_16b),
-		.data_16b_en(data_16b_en)
+		.data_16b_en(data_16b_en),
+		.cnt_ref	(cnt_ref)
 	);
 	
 	cam2fifo inst_cam2fifo(
@@ -352,7 +370,8 @@ module vga_module
 	pll_133 inst_133m(
 	    .inclk0( clk_tmp80M ),
 		.c0( clk_100M ),   	// 40
-		.c1( clk_133M  )    // 80MHz
+		.c1( clk_133M  ),    // 80MHz
+		.c2( clk_45M   )
 	);	 	
 	 /**************************************/
 	reset_gen inst_rst(
@@ -423,6 +442,7 @@ module vga_module
 		end	
 	end
 	
+	reg[21:9]	test_rdsdram_addr;
 
 	//	read SDRAM
 	always@(posedge clk_133M or negedge rst_133)begin
@@ -439,12 +459,13 @@ module vga_module
 				rd_sdram_req 		<= 0;
 				clear_rdsdram_fifo 	<= 1;
 				rd_sdram_add[23:22] <= vga_bank;
+				test_rdsdram_addr[21:9]	<= rd_sdram_add[21:9];
 			end
 			else begin
 				clear_rdsdram_fifo <= 0;
 				case(rd_sdram_req)
 					0 : begin
-						if( rdfifo_valid_d2 == 1 && rd_sdram_add[21:9] < 750) begin
+						if(rdfifo_valid_d2 == 1 && rd_sdram_add[21:9] < 750) begin// 
 							st_rdsdram <= 1;
 							rd_sdram_req <= 1;
 						end
@@ -524,9 +545,14 @@ module vga_module
 				wr_sdram_req 		<= 0;
 				clear_wrsdram_fifo	<= 1;
 				test_wrsdram_addr[21:9]	<= wr_sdram_add[21:9];
+				cnt_wrreq_r <= cnt_wrreq;
+				cnt_wrreq   <= 0;
 			end
 			else begin
 				clear_wrsdram_fifo <= 0;
+				if(pos_wrreq) begin
+					cnt_wrreq <= cnt_wrreq + 1;
+				end
 				case(wr_sdram_req)
 					0 : begin
 						if(fifo_valid_d2) begin
@@ -546,6 +572,15 @@ module vga_module
 			end
 		end
    end
+   //sdram write reg count
+   reg[31:0]	cnt_wrreq,cnt_wrreq_r;
+   reg		wrreq_d1,wrreq_d2;
+   wire  	pos_wrreq;
+   assign   pos_wrreq = wrreq_d1 & ~wrreq_d2;
+	always@(posedge clk_133M or negedge rst_133)begin
+		wrreq_d1 <= wr_sdram_req;
+		wrreq_d2 <= wrreq_d1;
+	end
 
    	reg	wr_req_d1;
 	reg[31:0] cnt_req = 0;
@@ -575,13 +610,13 @@ module vga_module
 	wire[19:0] digi;
 	reg[19:0]	cnt_vga_vsyn_r=0;
 //	assign digi =  cnt_ref_r[9:0]*1000 + cnt_pix_r[11:2] ;
-	assign digi =  cnt_ref_r[9:0]*1000 + wr_sdram_add[18:9] ;
+	assign digi =  cnt_wrreq_r[9:0]*1000 + test_wrsdram_addr[18:9] ;
 	
 	digitron inst_digi
 	(
 		.clk_i(CLK),
 		.rst_i(rst_100),
-		.num_i(),	//{7'h0,wr_sdram_add[21:9]}
+		.num_i(cnt_wrreq_r[19:0]),	//{7'h0,wr_sdram_add[21:9]}
 		.row_o(row_o),
 		.column_o(column_o)
 	);

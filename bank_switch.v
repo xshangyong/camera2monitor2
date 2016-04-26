@@ -30,12 +30,12 @@ module bank_switch(
 	assign cam_posedge = cam_rise_1d & ~cam_rise_2d;
 	always @ (posedge clk or negedge rst_133) begin
 		if(!rst_133) begin
-			vga_bank <= 	2'b00;
-			cam_bank <= 	2'b01;
+			vga_bank  <= 	2'b00;
+			cam_bank  <= 	2'b01;
 			bk3_state <= 	2'b01;			
 		end
 		else begin
-			if(1)begin
+			if(!button)begin			// sim change
 				if(vga_posedge && cam_posedge) begin
 					vga_bank <= cam_bank;
 					cam_bank <=	vga_bank;

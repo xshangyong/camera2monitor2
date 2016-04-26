@@ -32,7 +32,7 @@ module reset_gen
 	
 	
 	always @(posedge clk_100) begin
-		if(cnt_init == 32'd100) begin
+		if(cnt_init == 32'd10000) begin
 			cnt_init <= cnt_init;
 			rst_init <= 1;
 		end

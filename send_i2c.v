@@ -26,9 +26,9 @@ module send_i2c
 	reg			sclk_pulse 	= 0;
 	reg			sda_r 		= 1;
 
-    reg [5:0] cyc_count;
-    reg reg_sdat;
-    reg reg_clk;
+    reg [5:0] cyc_count=6'b111111;
+    reg reg_sdat=1;
+    reg reg_clk=1;
     reg ack1,ack2,ack3;
  
    
@@ -63,8 +63,7 @@ module send_i2c
        else
           case(cyc_count)
           0:begin i2c_ack<=0;reg_clk<=1;reg_sdat<=1;end
-          1:reg_sdat<=0;                 //开始传输
-          2:reg_clk<=0;
+          1:reg_sdat<=0;                 //开始传�          2:reg_clk<=0;
           3:reg_sdat<=cfg_data[31];
           4:reg_sdat<=cfg_data[30];
           5:reg_sdat<=cfg_data[29];

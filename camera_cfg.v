@@ -12,19 +12,20 @@ module camera_cfg
 	output sclk;
 	output sda;
 	output cfg_done;
-	reg [15:0]clock_20k_cnt;
-	reg [1:0]config_step;
+	reg [15:0]clock_20k_cnt=0;
+	reg [1:0]config_step=0;
 
-	reg [31:0]i2c_data;
+	reg [31:0]i2c_data=0;
 	reg [23:0]reg_data;
-	reg i2c_req;
-	reg reg_conf_done_reg;
-	reg [8:0]reg_index;
+	reg i2c_req=0;
+	reg reg_conf_done_reg=0;
+	reg [8:0]reg_index=0;
 	reg	rst1;
 	reg	rst2;	
-	reg clock_20k;
+	reg clock_20k=0;
 	wire	i2c_ack;
-	
+	  reg[31:0]	cnt_30ms = 0;
+	  reg		wait_30ms_ok = 0;
 	assign cfg_done = reg_conf_done_reg;
 	send_i2c inst_sendi2c(
 		.clk_20k(clock_20k),
@@ -47,6 +48,15 @@ module camera_cfg
 		end
 	end 
 
+	always@(posedge clock_20k) begin
+		if(cnt_30ms <= 600) begin
+			cnt_30ms <= cnt_30ms + 1;
+		end
+		else begin
+			cnt_30ms <= cnt_30ms;
+			wait_30ms_ok <= 1;
+		end
+	end
 
 
 	//产生i2c控制时钟-20khz    
@@ -72,9 +82,9 @@ module camera_cfg
 			reg_conf_done_reg<=0;
 		end
 		else begin
-			if(reg_conf_done_reg==1'b0) begin          //如果camera初始化未完成
+			if(reg_conf_done_reg==1'b0 && wait_30ms_ok == 1) begin          //如果camera初始化未完成
 				 // if(reg_index<251) begin
-				  if(reg_index<240) begin
+				  if(reg_index<238) begin
 						 case(config_step)
 						 0:begin
 							i2c_data<={8'h78,reg_data};       //IIC Device address is 0x78   
@@ -82,7 +92,7 @@ module camera_cfg
 							config_step<=1;
 						 end
 						 1:begin
-							if(i2c_ack) begin                       //IIC发送结束               					
+							if(i2c_ack) begin                       //IIC发送结�              					
 								 i2c_req<=0;
 								 config_step<=2;
 							end
@@ -230,7 +240,7 @@ module camera_cfg
 				 124:reg_data<=24'h583a26;
 				 125:reg_data<=24'h583b28;
 				 126:reg_data<=24'h583c42;
-				 127:reg_data<=24'h583dce;// lenc BR offset // AWB   自动白平�				 
+				 127:reg_data<=24'h583dce;// lenc BR offset // AWB   自动白平�			 
 				 128:reg_data<=24'h5180ff;// AWB B block
 				 129:reg_data<=24'h5181f2;// AWB control 
 				 130:reg_data<=24'h518200;// [7:4] max local counter, [3:0] max fast counter
@@ -289,15 +299,14 @@ module camera_cfg
 				 183:reg_data<=24'h53886c;// CMX8 for V
 				 184:reg_data<=24'h538910;// CMX9 for V
 				 185:reg_data<=24'h538a01;// sign[9]
-				 186:reg_data<=24'h538b98; // sign[8:1] // UV adjust   UV色彩饱和度调�				 
+				 186:reg_data<=24'h538b98; // sign[8:1] // UV adjust   UV色彩饱和度调�			 
 				 187:reg_data<=24'h558006;// saturation on, bit[1]
 				 188:reg_data<=24'h558340;
 				 189:reg_data<=24'h558410;
 				 190:reg_data<=24'h558910;
 				 191:reg_data<=24'h558a00;
 				 192:reg_data<=24'h558bf8;
-				 193:reg_data<=24'h501d40;// enable manual offset of contrast// CIP  锐化和降�
-				 194:reg_data<=24'h530008;// CIP sharpen MT threshold 1
+				 193:reg_data<=24'h501d40;// enable manual offset of contrast// CIP  锐化和降�				 194:reg_data<=24'h530008;// CIP sharpen MT threshold 1
 				 195:reg_data<=24'h530130;// CIP sharpen MT threshold 2
 				 196:reg_data<=24'h530210;// CIP sharpen MT offset 1
 				 197:reg_data<=24'h530300;// CIP sharpen MT offset 2

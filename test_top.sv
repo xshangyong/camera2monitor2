@@ -42,7 +42,7 @@ module test_top();
 	reg[31:0] cnt_row = 0;
 	reg[31:0] cnt_pix = 0;
 	reg[15:0] cam_data = 0;
-	reg			cam_data_bit = 0;
+	reg		  cam_data_bit = 0;
 	initial begin
 		RSTn = 1;
 		CLK = 0;
